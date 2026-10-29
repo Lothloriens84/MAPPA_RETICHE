@@ -66,25 +66,39 @@ COUNTRY_FILL = {
 }
 PALE_MIX = 0.55    # share of the territory colour kept outside the study area
 
-# Study area: Rhaetian Alps, approximate outline along
-# Rhine – Ill – Arlberg – Inn – Brenner – Isarco – Adige – Lake Garda –
-# Val Camonica – Valtellina – Lake Como – Splügen.
+# Study area: SOIUSA II/A-15 Western Rhaetian Alps + II/A-16 Eastern Rhaetian Alps
+# + II/C-28 Southern Rhaetian Alps (Marazzi 2005). Approximate outline traced along
+# the section boundaries, clockwise from the Ill–Rhine confluence:
 STUDY_AREA = [
-    (9.6271, 47.3197), (9.6765, 47.2875), (9.8, 47.2446), (9.9482, 47.191),
-    (10.1088, 47.1803), (10.2447, 47.1695), (10.43, 47.1695), (10.4918, 47.1695),
-    (10.6647, 47.1803), (10.8747, 47.1803), (11.0847, 47.2875), (11.2824, 47.3197),
-    (11.4924, 47.3626), (11.7024, 47.3197), (11.9, 47.309), (11.9247, 47.2446),
-    (11.9618, 47.1695), (11.9988, 47.0837), (12.0359, 47.0301), (11.9741, 46.9658),
-    (11.9371, 46.9228), (12.0482, 46.8585), (12.1594, 46.8049), (12.2212, 46.7191),
-    (12.11, 46.644), (11.9618, 46.526), (11.8382, 46.4831), (11.7765, 46.3866),
-    (11.6653, 46.215), (11.5541, 46.1828), (11.5541, 46.0326), (11.4924, 45.9254),
-    (11.4553, 45.8396), (11.3812, 45.7967), (11.2082, 45.8289), (11.0353, 45.8074),
-    (10.8871, 45.7967), (10.8129, 45.7431), (10.6894, 45.8289), (10.5412, 45.9147),
-    (10.5782, 46.0326), (10.5782, 46.1506), (10.3559, 46.1184), (10.2571, 46.1506),
-    (10.01, 46.1399), (9.6394, 46.1077), (9.4294, 46.1184), (9.4294, 46.3008),
-    (9.3429, 46.5046), (9.3306, 46.5475), (9.4788, 46.7083), (9.4418, 46.837),
-    (9.59, 46.8692), (9.6271, 46.9979), (9.4788, 47.0837), (9.5282, 47.2124),
-    (9.6271, 47.3197),
+    # Ill (Walgau) – Klostertal – Arlberg – Stanzertal
+    (9.58, 47.265), (9.66, 47.21), (9.82, 47.155), (9.96, 47.14), (10.06, 47.13),
+    (10.21, 47.13), (10.40, 47.135), (10.565, 47.14),
+    # Inn: Landeck – Imst – Telfs – Innsbruck
+    (10.66, 47.20), (10.74, 47.235), (10.90, 47.27), (11.07, 47.30), (11.24, 47.275),
+    (11.39, 47.265),
+    # Sill (Wipptal) – Brenner
+    (11.42, 47.20), (11.45, 47.13), (11.46, 47.08), (11.507, 47.003),
+    # Isarco: Sterzing – Franzensfeste – Brixen – Klausen – Bolzano
+    (11.44, 46.94), (11.43, 46.895), (11.53, 46.84), (11.61, 46.79), (11.655, 46.715),
+    (11.565, 46.64), (11.53, 46.60), (11.45, 46.52), (11.35, 46.49),
+    # Adige: Bolzano – Salorno – Mezzocorona – Trento
+    (11.32, 46.40), (11.30, 46.345), (11.21, 46.24), (11.12, 46.21), (11.11, 46.14),
+    (11.12, 46.07),
+    # Valle dei Laghi – Sarca – Passo del Durone – Giudicarie – Chiese – Caffaro
+    (11.065, 46.085), (10.995, 46.08), (10.95, 46.04), (10.87, 46.035), (10.77, 46.03),
+    (10.72, 46.035), (10.665, 45.98), (10.64, 45.94), (10.60, 45.89), (10.53, 45.85),
+    (10.47, 45.83),
+    # Passo di Croce Domini – Breno – Val Camonica – Edolo – Aprica
+    (10.41, 45.91), (10.30, 45.96), (10.35, 46.08), (10.33, 46.18), (10.15, 46.155),
+    # Valtellina (Adda): Tresenda – Sondrio – Morbegno – Lake Como
+    (10.105, 46.155), (9.87, 46.17), (9.57, 46.135), (9.41, 46.16),
+    # Lago di Mezzola – Mera – Chiavenna – Val San Giacomo – Splügen Pass
+    (9.45, 46.22), (9.40, 46.32), (9.35, 46.40), (9.36, 46.44), (9.33, 46.505),
+    # Hinterrhein: Splügen – Andeer – Via Mala – Thusis – Reichenau
+    (9.32, 46.55), (9.43, 46.60), (9.44, 46.70), (9.43, 46.77), (9.41, 46.82),
+    # Rhine: Chur – Landquart – Bad Ragaz – Vaduz – Feldkirch
+    (9.52, 46.87), (9.55, 46.96), (9.50, 47.00), (9.50, 47.06), (9.52, 47.14),
+    (9.51, 47.17), (9.51, 47.22), (9.58, 47.265),
 ]
 
 # Operating territories: key -> (admin level, country, Natural Earth name, English label, label lon, lat)
@@ -92,11 +106,11 @@ TERRITORIES = {
     "GR":  ("admin1", "Switzerland",   "Graubünden",    "Graubünden",   9.95, 46.72),
     "LI":  ("admin0", "Liechtenstein", "Liechtenstein", None,           0, 0),   # labelled as a country
     "VBG": ("admin1", "Austria",       "Vorarlberg",    "Vorarlberg",   9.80, 47.43),
-    "TIR": ("admin1", "Austria",       "Tirol",         "Tyrol",       11.20, 47.25),
-    "SO":  ("admin1", "Italy",         "Sondrio",       "Sondrio",      9.85, 46.21),
-    "BS":  ("admin1", "Italy",         "Brescia",       "Brescia",     10.36, 45.96),
-    "BZ":  ("admin1", "Italy",         "Bozen",         "South Tyrol", 11.32, 46.78),
-    "TN":  ("admin1", "Italy",         "Trento",        "Trentino",    11.00, 46.07),
+    "TIR": ("admin1", "Austria",       "Tirol",         "Tyrol",       11.02, 46.98),
+    "SO":  ("admin1", "Italy",         "Sondrio",       "Sondrio",      9.62, 46.25),
+    "BS":  ("admin1", "Italy",         "Brescia",       "Brescia",     10.22, 45.86),
+    "BZ":  ("admin1", "Italy",         "Bozen",         "South Tyrol", 11.08, 46.74),
+    "TN":  ("admin1", "Italy",         "Trento",        "Trentino",    10.82, 46.24),
 }
 
 # Entities.  kind = "club" (alpine club) or "authority" (public body).
@@ -108,17 +122,17 @@ ENTITIES = {
     "SAC":  dict(kind="club", label="SAC", name="Schweizer\nAlpen-Club", colour="#9E3B33",
                  badge=(-0.115, 0.52), targets=[("GR", 9.80, 46.58)]),
     "CAI":  dict(kind="club", label="CAI", name="Club Alpino\nItaliano", colour="#2F6B4F",
-                 badge=(-0.115, 0.17), targets=[("SO", 9.95, 46.30), ("BS", 10.38, 46.06)]),
+                 badge=(-0.115, 0.17), targets=[("SO", 10.02, 46.36), ("BS", 10.45, 46.08)]),
     "DAV":  dict(kind="club", label="DAV", name="Deutscher\nAlpenverein", colour="#3C4A7A",
-                 badge=(0.30, 1.12), targets=[("VBG", 9.88, 47.12), ("TIR", 10.75, 47.22)]),
+                 badge=(0.30, 1.12), targets=[("VBG", 9.90, 47.06), ("TIR", 10.82, 47.10)]),
     "OEAV": dict(kind="club", label="ÖAV", name="Österreichischer\nAlpenverein", colour="#B5562C",
-                 badge=(0.66, 1.12), targets=[("VBG", 10.10, 47.06), ("TIR", 11.70, 47.20)]),
+                 badge=(0.66, 1.12), targets=[("VBG", 10.12, 47.02), ("TIR", 11.25, 47.12)]),
     "AVS":  dict(kind="club", label="AVS", name="Alpenverein\nSüdtirol", colour="#7A5C2E",
-                 badge=(1.115, 0.78), targets=[("BZ", 11.45, 46.92)]),
+                 badge=(1.115, 0.78), targets=[("BZ", 11.25, 46.86)]),
     "APS":  dict(kind="authority", label="APS", name="Provincia autonoma\ndi Bolzano",
-                 colour="#6E4F7A", badge=(1.115, 0.46), targets=[("BZ", 11.72, 46.55)]),
+                 colour="#6E4F7A", badge=(1.115, 0.46), targets=[("BZ", 11.05, 46.58)]),
     "SAT":  dict(kind="club", label="SAT", name="Società degli Alpinisti\nTridentini", colour="#4E7D3A",
-                 badge=(1.115, 0.14), targets=[("TN", 11.15, 46.22)]),
+                 badge=(1.115, 0.14), targets=[("TN", 11.00, 46.34)]),
 }
 
 # Country labels (English). Liechtenstein gets a leader line.
@@ -138,8 +152,9 @@ REGION_OUTLINE = ("Italy", "Lombardia")   # dissolved provinces -> thin region b
 
 LOGO_HEIGHT_PX = 70
 TITLE = "The Rhaetian Alps: regional boundaries and hut-governing entities"
-SOURCE = ("Study-area outline (approximate): Rhine – Ill – Arlberg – Inn – Brenner – Isarco – Adige – "
-          "Lake Garda – Val Camonica – Valtellina – Lake Como – Splügen.\n"
+SOURCE = ("Study area: SOIUSA Western (II/A-15), Eastern (II/A-16) and Southern (II/C-28) Rhaetian Alps.\nOutline (approximate): "
+          "Lake Como – Splügen – Hinterrhein – Rhine – Ill – Arlberg – Inn – Sill – Brenner – Isarco – Adige – "
+          "Valle dei Laghi – Giudicarie – Croce Domini – Val Camonica – Aprica – Valtellina.\n"
           "Base map: Natural Earth 1:10m Cultural Vectors (public domain), naturalearthdata.com. "
           "Map: author's elaboration.")
 LOGO_CREDIT = " Logos © the respective organisations, reproduced for identification only."

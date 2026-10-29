@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Mappa Retiche: source code for a map of the Rhaetian Alps and their hut-governing entities"
+type: software
+authors:
+  - family-names: Marcolla
+    given-names: Sara Veronica
+    orcid: "https://orcid.org/0009-0002-8761-0241"
+    affiliation: University of Coimbra
+repository-code: "https://github.com/Lothloriens84/MAPPA_RETICHE"
+license: GPL-3.0-or-later
+version: "2.0"
+keywords:
+  - Rhaetian Alps
+  - SOIUSA
+  - mountain huts
+  - cartography
