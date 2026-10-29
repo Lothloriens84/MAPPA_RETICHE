@@ -47,9 +47,9 @@ LON_MIN, LON_MAX = 8.75, 12.95
 LAT_MIN, LAT_MAX = 45.55, 47.62
 
 C = dict(
-    paper="#F4F1EA",
-    other="#E6E2D8",
-    border_admin="#FFFFFF",
+    paper="#FFFFFF",
+    other="#FFFFFF",
+    border_admin="#D3CEC4",
     border_country="#6B6458",
     border_region="#9C9384",
     study="#4A5D43",
