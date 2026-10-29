@@ -15,6 +15,7 @@ hut-governing entities (seven alpine clubs and one public authority) own or oper
 |---|---|
 | `rhaetian_map.py` | The script. All settings (outline, territories, labels, colours) are in its CONFIG section. |
 | `ne_data/` | Natural Earth 1:10m boundaries, trimmed to the Alpine area (7.5–14.2°E, 44.3–48.9°N). |
+| `logos/` | Entity logos (PNG, trimmed), named by entity key: LAV, SAC, CAI, DAV, OEAV, AVS, APS, SAT. |
 | `output/` | The rendered figure (PDF, PNG at 300 dpi, SVG). |
 | `requirements.txt` | Python dependencies (matplotlib only). |
 
@@ -26,8 +27,8 @@ cd output
 python ../rhaetian_map.py ../ne_data --out F1_Rhaetian_alps_map
 ```
 
-Optional: put logo images in a `logos/` folder, named by entity key (e.g. `logos/SAT.png`),
-and pass `--logos path/to/logos`. Missing logos fall back to text badges.
+Logos are read from `logos/` next to the script and drawn above each entity's box.
+Use `--logos other/folder` to point elsewhere, or `--logos none` for a version without logos.
 
 ## Method notes
 
@@ -43,4 +44,5 @@ and pass `--logos path/to/logos`. Missing logos fall back to text badges.
 
 - Base map: [Natural Earth](https://www.naturalearthdata.com) 1:10m Cultural Vectors, public domain.
 - Section limits: Marazzi, S. (2005). *Atlante orografico delle Alpi. SOIUSA*. Pavone Canavese: Priuli & Verlucca.
+- Logos: © the respective organisations (DAV, ÖAV, LAV, SAC, CAI, AVS, SAT, Autonome Provinz Bozen – Südtirol), reproduced for identification only. They are **not** covered by the code licence.
 - Code: GNU GPL v3 or later (see `LICENSE`).

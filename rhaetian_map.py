@@ -150,7 +150,8 @@ REGION_LABELS = [
 ]
 REGION_OUTLINE = ("Italy", "Lombardia")   # dissolved provinces -> thin region boundary
 
-LOGO_HEIGHT_PX = 70
+LOGO_MAX_W, LOGO_MAX_H = 100, 40   # logo box above each badge, in points
+LOGO_GAP = 5                      # points between logo and badge
 TITLE = "The Rhaetian Alps: regional boundaries and hut-governing entities"
 SOURCE = ("Study area: SOIUSA Western (II/A-15), Eastern (II/A-16) and Southern (II/C-28) Rhaetian Alps.\nOutline (approximate): "
           "Lake Como – Splügen – Hinterrhein – Rhine – Ill – Arlberg – Inn – Sill – Brenner – Isarco – Adige – "
@@ -242,23 +243,29 @@ def badge_box(a):
     return dict(boxstyle="round,pad=0.35,rounding_size=0.6", fc="white", ec=a["colour"], lw=1.2)
 
 
-def make_badge(key, a, logo_dir):
-    img_path = None
-    if logo_dir:
-        for ext in (".png", ".jpg", ".jpeg"):
-            p = os.path.join(logo_dir, key + ext)
-            if os.path.exists(p):
-                img_path = p
-                break
+def make_badge(a):
+    """Box content: acronym + full name."""
     caption = TextArea(a["name"], textprops=dict(size=7.2, color=C["text"], ha="center",
                                                  linespacing=1.15, multialignment="center"))
-    if img_path:
-        img = plt.imread(img_path)
-        zoom = LOGO_HEIGHT_PX / img.shape[0]
-        head = OffsetImage(img, zoom=zoom * 300 / 72 / 4.17)
-    else:
-        head = TextArea(a["label"], textprops=dict(size=13, weight="bold", color=a["colour"], ha="center"))
-    return VPacker(children=[head, caption], align="center", pad=0, sep=3), bool(img_path)
+    head = TextArea(a["label"], textprops=dict(size=13, weight="bold", color=a["colour"], ha="center"))
+    return VPacker(children=[head, caption], align="center", pad=0, sep=3)
+
+
+def find_logo(key, logo_dir):
+    if not logo_dir:
+        return None
+    for ext in (".png", ".jpg", ".jpeg"):
+        p = os.path.join(logo_dir, key + ext)
+        if os.path.exists(p):
+            return p
+    return None
+
+
+def make_logo(path):
+    """Logo scaled to fit LOGO_MAX_W x LOGO_MAX_H points."""
+    img = plt.imread(path)
+    h, w = img.shape[:2]
+    return OffsetImage(img, zoom=min(LOGO_MAX_W / w, LOGO_MAX_H / h), interpolation="lanczos")
 
 
 class HandlerBadge(HandlerPatch):
@@ -282,7 +289,8 @@ class HandlerBadge(HandlerPatch):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("ne_dir", help="folder with Natural Earth 10m GeoJSON files")
-    ap.add_argument("--logos", default="logos")
+    ap.add_argument("--logos", default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "logos"),
+                    help="folder with <KEY>.png logos (default: logos/ next to this script); 'none' to disable")
     ap.add_argument("--out", default="F1_Rhaetian_alps_map")
     args = ap.parse_args()
 
@@ -291,8 +299,8 @@ def main():
     lakes = load(os.path.join(args.ne_dir, "ne_10m_lakes.geojson"))
 
     plt.rcParams["font.family"] = "DejaVu Sans"
-    fig = plt.figure(figsize=(11.5, 8.4), facecolor=C["paper"])
-    ax = fig.add_axes([0.14, 0.155, 0.72, 0.65])
+    fig = plt.figure(figsize=(11.5, 9.0), facecolor=C["paper"])
+    ax = fig.add_axes([0.14, 0.145, 0.72, 0.607])
     ax.set_facecolor(C["other"])
 
     # 1 — background admin units
@@ -379,7 +387,7 @@ def main():
         s.set_edgecolor(C["border_country"]); s.set_linewidth(0.8)
 
     # 8 — arrows + badges
-    any_logo = False
+    badges_with_logo = []
     for key, a in ENTITIES.items():
         ls = (0, (4, 2)) if a["kind"] == "authority" else "-"
         for terr, tlon, tlat in a["targets"]:
@@ -393,11 +401,25 @@ def main():
                                         connectionstyle=f"arc3,rad={rad}"),
                         annotation_clip=False, zorder=7)
             ax.plot(tx, ty, "o", ms=3.2, mfc="white", mec=a["colour"], mew=1.2, zorder=8)
-        badge, has_logo = make_badge(key, a, args.logos)
-        any_logo |= has_logo
-        ax.add_artist(AnnotationBbox(badge, a["badge"], xycoords="axes fraction",
-                                     frameon=True, annotation_clip=False, zorder=9, pad=0.45,
-                                     bboxprops=badge_box(a)))
+        ab = AnnotationBbox(make_badge(a), a["badge"], xycoords="axes fraction",
+                            frameon=True, annotation_clip=False, zorder=9, pad=0.45,
+                            bboxprops=badge_box(a))
+        ax.add_artist(ab)
+        logo = find_logo(key, args.logos)
+        if logo:
+            badges_with_logo.append((ab, a, logo))
+
+    # 8b — logos above their badges (needs the badges' rendered height)
+    any_logo = bool(badges_with_logo)
+    fig.canvas.draw()
+    r = fig.canvas.get_renderer()
+    for ab, a, logo in badges_with_logo:
+        bb = ab.get_window_extent(r)
+        cx, cy = ax.transAxes.transform(a["badge"])
+        dy = (bb.y1 - cy) * 72 / fig.dpi + LOGO_GAP
+        ax.add_artist(AnnotationBbox(make_logo(logo), a["badge"], xycoords="axes fraction",
+                                     xybox=(0, dy), boxcoords="offset points", box_alignment=(0.5, 0),
+                                     frameon=False, annotation_clip=False, zorder=9))
 
     # 9 — scale bar and north arrow
     sb_len = 50 / 111.32
@@ -432,14 +454,14 @@ def main():
         f"Alpine club ({n_club})",
         f"Public authority ({n_auth})",
     ]
-    leg = fig.legend(handles, labels, loc="lower center", bbox_to_anchor=(0.5, 0.068), ncol=4,
+    leg = fig.legend(handles, labels, loc="lower center", bbox_to_anchor=(0.5, 0.0635), ncol=4,
                      frameon=False, fontsize=7.6, handlelength=2.4, handleheight=1.1,
                      columnspacing=1.6, labelcolor=C["text"],
                      handler_map={club_h: HandlerBadge(True, False), auth_h: HandlerBadge(False, True)})
 
     # 11 — title + source line
     fig.text(0.5, 0.975, TITLE, ha="center", va="top", size=13.5, weight="bold", color=C["text"])
-    fig.text(0.5, 0.018, SOURCE + (LOGO_CREDIT if any_logo else ""), ha="center", va="bottom",
+    fig.text(0.5, 0.017, SOURCE + (LOGO_CREDIT if any_logo else ""), ha="center", va="bottom",
              size=7.2, color=C["muted"], linespacing=1.4)
 
     for ext in ("png", "pdf", "svg"):
