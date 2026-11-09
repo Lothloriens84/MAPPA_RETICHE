@@ -21,13 +21,16 @@ MATCH = [  # (key, substrings in NAME / NAME_ENG, lower case); first hit wins
     ("STE",  ["stelvio", "stilfser"]),
     ("SNP",  ["swiss national park", "schweizerischer nationalpark", "parc naziunal"]),
     ("TEX",  ["tessa", "texel"]),
-    ("OTZ",  ["ötztal", "oetztal"]),
+    # Naturpark Ötztal is an umbrella over five areas (factsheet 2017); each record is merged into OTZ
+    ("OTZ",  ["ruhegebiet ötztaler alpen", "ötztaler alpen", "ruhegebiet stubaier alpen", "stubaier alpen",
+              "engelswand", "achstürze", "piburger", "windachtal", "naturpark ötztal"]),
     ("KAU",  ["kaunergrat"]),
     ("BVM",  ["biosfera val müstair", "biosfera val muestair", "biosphere val müstair", "val müstair biosfera"]),
     ("ELA",  ["ela"]),
 ]
 
 
+COMPOSITE = {"OTZ"}   # keys built from several WDPA records
 MIN_KM2 = 10   # parks in the study area are all far larger; guards against small namesake sites
 
 
@@ -36,7 +39,9 @@ EXCLUDE_DESIG = ["directive", "inventory", "unesco-mab", "ramsar", "world herita
 
 
 def key_for(row):
-    if (row.get("GIS_AREA") or 0) < MIN_KM2:
+    name = " ".join(str(row.get(k) or "") for k in ("NAME", "NAME_ENG")).lower()
+    small_ok = any(s in name for s in ("engelswand", "achstürze", "piburger", "windachtal"))
+    if (row.get("GIS_AREA") or 0) < MIN_KM2 and not small_ok:
         return None
     if any(x in str(row.get("DESIG_ENG") or "").lower() for x in EXCLUDE_DESIG):
         return None
@@ -71,12 +76,23 @@ def main():
                 k = key_for(r)
                 print(f"{r['SITE_ID']:>8}  {r.get('NAME')}  ->  {k or 'not in PARKS, skipped'}")
                 if k:
-                    feats[k] = {"type": "Feature",
-                                "properties": {"key": k, "SITE_ID": r["SITE_ID"], "NAME": r.get("NAME")},
-                                "geometry": {"type": "Polygon" if len(r["SHAPE"]) == 1 else "MultiPolygon",
-                                             "coordinates": [[list(p) for p in rg] for rg in r["SHAPE"]]
-                                             if len(r["SHAPE"]) == 1 else
-                                             [[[list(p) for p in rg]] for rg in r["SHAPE"]]}}
+                    polys = [[[list(p) for p in rg]] for rg in r["SHAPE"]]
+                    if k in COMPOSITE and k in feats:
+                        f = feats[k]
+                        ids = f["properties"]["SITE_ID"]
+                        ids = ids if isinstance(ids, list) else [ids]
+                        if r["SITE_ID"] in ids:
+                            continue
+                        f["properties"]["SITE_ID"] = ids + [r["SITE_ID"]]
+                        f["properties"]["NAME"] += "; " + str(r.get("NAME"))
+                        if f["geometry"]["type"] == "Polygon":
+                            f["geometry"] = {"type": "MultiPolygon",
+                                             "coordinates": [[rg] for rg in f["geometry"]["coordinates"]]}
+                        f["geometry"]["coordinates"] += polys
+                    else:
+                        feats[k] = {"type": "Feature",
+                                    "properties": {"key": k, "SITE_ID": r["SITE_ID"], "NAME": r.get("NAME")},
+                                    "geometry": {"type": "MultiPolygon", "coordinates": polys}}
     json.dump({"type": "FeatureCollection", "features": list(feats.values())},
               open(a.out, "w", encoding="utf-8"))
     print(f"{len(feats)} park(s) in {a.out}: {', '.join(sorted(feats))}")
