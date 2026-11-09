@@ -130,6 +130,8 @@ def parse_poly(g, gp):
     i = 0
     gtype, i = varuint(g, i)
     base = gtype & 0xFF
+    if base not in (5, 15, 19, 25, 51):   # not a polygon (e.g. WDPA point-only records)
+        return None
     curves = bool(gtype & 0x20000000)
     npts, i = varuint(g, i)
     if npts == 0:

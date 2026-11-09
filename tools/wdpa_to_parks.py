@@ -52,7 +52,10 @@ def main():
             except Exception:
                 continue
             for r in rows:
-                if not r.get("SHAPE") or "SITE_ID" not in r:
+                if "SITE_ID" not in r:
+                    continue
+                if not r.get("SHAPE"):
+                    print(f"{r['SITE_ID']:>8}  {r.get('NAME')}  ({r.get('DESIG_ENG')}): point only, no boundary, skipped")
                     continue
                 k = key_for(r)
                 print(f"{r['SITE_ID']:>8}  {r.get('NAME')}  ->  {k or 'not in PARKS, skipped'}")
