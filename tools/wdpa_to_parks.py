@@ -29,7 +29,7 @@ MATCH = [  # (key, substrings in NAME / NAME_ENG, lower case); first hit wins
 
 
 def key_for(row):
-    name = " ".join(str(row.get(k) or "") for k in ("NAME", "NAME_ENG")).lower()
+    name = " ".join(str(row.get(k) or "") for k in ("NAME", "NAME_ENG", "DESIG_ENG")).lower()
     for key, subs in MATCH:
         if any(s in name.split() if s == "ela" else s in name for s in subs):
             return key
