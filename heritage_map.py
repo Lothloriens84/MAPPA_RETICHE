@@ -7,7 +7,7 @@ outline and Natural Earth base, with a second layer of actors that also claim
 mountain food in the area as heritage:
 
   * protected areas (national parks, nature parks, Swiss parks of national
-    importance), numbered in circles keyed below the map,
+    importance), each labelled by name,
   * territorial quality labels, as badges pointing to their territory,
   * a valley initiative (100% Valposchiavo),
   * intangible cultural heritage inscribed by UNESCO (transhumance, alpinism).
@@ -36,7 +36,7 @@ import matplotlib.pyplot as plt
 from matplotlib.legend_handler import HandlerBase
 from matplotlib.lines import Line2D
 from matplotlib.offsetbox import AnnotationBbox, TextArea, VPacker
-from matplotlib.patches import PathPatch, FancyBboxPatch, Patch, Rectangle, Ellipse
+from matplotlib.patches import PathPatch, FancyBboxPatch, Patch
 import matplotlib.patheffects as pe
 
 import rhaetian_map as rm
@@ -56,35 +56,36 @@ PARK_KIND = {
     "swiss":    dict(fc="#5E9C8F", alpha=0.55, hatch="....", label="Swiss park of national importance"),
 }
 
-# Protected areas: key -> name, kind, badge lon/lat, schematic outline (lon, lat)
+# Protected areas: key -> name, kind, anchor lon/lat inside the park, map label (text, lon/lat;
+# a leader line is drawn to the anchor when the label sits outside), schematic outline (lon, lat)
 PARKS = {
-    "STE": dict(n=1, name="Stelvio National Park", kind="national", at=(10.63, 46.45), outline=[
+    "STE": dict(n=1, name="Stelvio National Park", kind="national", at=(10.63, 46.45), label=("Stelvio\nNational Park", (10.66, 46.44)), outline=[
         (10.27, 46.47), (10.33, 46.55), (10.42, 46.56), (10.50, 46.62), (10.62, 46.63), (10.75, 46.60),
         (10.88, 46.57), (11.00, 46.53), (11.02, 46.47), (10.92, 46.42), (10.85, 46.36), (10.72, 46.32),
         (10.60, 46.31), (10.52, 46.28), (10.44, 46.26), (10.37, 46.29), (10.35, 46.36), (10.28, 46.40)]),
-    "SNP": dict(n=2, name="Swiss National Park", kind="national", at=(10.16, 46.67), outline=[
+    "SNP": dict(n=2, name="Swiss National Park", kind="national", at=(10.16, 46.67), label=("Swiss\nNational Park", (10.02, 46.86)), outline=[
         (10.00, 46.62), (10.05, 46.68), (10.12, 46.71), (10.20, 46.74), (10.28, 46.73), (10.32, 46.69),
         (10.28, 46.65), (10.23, 46.62), (10.17, 46.61), (10.12, 46.57), (10.05, 46.58)]),
-    "PNAB": dict(n=3, name="Adamello Brenta Nature Park", kind="nature", at=(10.93, 46.20), outline=[
+    "PNAB": dict(n=3, name="Adamello Brenta Nature Park", kind="nature", at=(10.84, 46.14), label=("Adamello Brenta\nNature Park", (10.84, 46.14)), outline=[
         (10.54, 46.04), (10.55, 46.15), (10.58, 46.24), (10.68, 46.27), (10.80, 46.30), (10.92, 46.33),
         (11.02, 46.27), (11.00, 46.15), (10.95, 46.09), (10.88, 46.08), (10.81, 46.15), (10.75, 46.10),
         (10.68, 46.03), (10.60, 45.98)]),
-    "ADA": dict(n=4, name="Adamello Regional Park", kind="nature", at=(10.46, 46.06), outline=[
+    "ADA": dict(n=4, name="Adamello Regional Park", kind="nature", at=(10.46, 46.06), label=("Adamello\nRegional Park", (10.12, 45.98)), outline=[
         (10.42, 46.23), (10.50, 46.25), (10.54, 46.17), (10.52, 46.04), (10.58, 45.98), (10.50, 45.92),
         (10.42, 45.93), (10.38, 46.02), (10.38, 46.12), (10.40, 46.19)]),
-    "TEX": dict(n=5, name="Texelgruppe Nature Park", kind="nature", at=(11.06, 46.745), outline=[
+    "TEX": dict(n=5, name="Texelgruppe Nature Park", kind="nature", at=(11.06, 46.745), label=("Texelgruppe\nNature Park", (11.36, 46.86)), outline=[
         (10.92, 46.67), (10.95, 46.74), (11.00, 46.79), (11.08, 46.81), (11.15, 46.78), (11.17, 46.72),
         (11.12, 46.69), (11.05, 46.70), (10.98, 46.66)]),
-    "OTZ": dict(n=6, name="Ötztal Nature Park", kind="nature", at=(11.00, 46.91), outline=[
+    "OTZ": dict(n=6, name="Ötztal Nature Park", kind="nature", at=(11.00, 46.91), label=("Ötztal\nNature Park", (11.3, 47.0)), outline=[
         (10.86, 46.80), (10.88, 46.95), (10.95, 47.02), (11.05, 47.00), (11.10, 46.92), (11.08, 46.84),
         (11.00, 46.80), (10.92, 46.78)]),
-    "KAU": dict(n=7, name="Kaunergrat Nature Park", kind="nature", at=(10.77, 47.06), outline=[
+    "KAU": dict(n=7, name="Kaunergrat Nature Park", kind="nature", at=(10.77, 47.06), label=("Kaunergrat\nNature Park", (10.42, 47.22)), outline=[
         (10.66, 47.07), (10.70, 47.17), (10.78, 47.22), (10.85, 47.18), (10.87, 47.05), (10.85, 46.94),
         (10.79, 46.89), (10.72, 46.95), (10.68, 47.01)]),
-    "BVM": dict(n=8, name="Biosfera Val Müstair", kind="swiss", at=(10.40, 46.62), outline=[
+    "BVM": dict(n=8, name="Biosfera Val Müstair", kind="swiss", at=(10.40, 46.62), label=("Biosfera\nVal Müstair", (10.47, 46.80)), outline=[
         (10.30, 46.63), (10.34, 46.67), (10.41, 46.68), (10.47, 46.65), (10.47, 46.60), (10.40, 46.57),
         (10.33, 46.59)]),
-    "ELA": dict(n=9, name="Parc Ela", kind="swiss", at=(9.71, 46.58), outline=[
+    "ELA": dict(n=9, name="Parc Ela", kind="swiss", at=(9.71, 46.58), label=("Parc Ela", (9.71, 46.57)), outline=[
         (9.52, 46.62), (9.60, 46.68), (9.70, 46.70), (9.80, 46.67), (9.88, 46.60), (9.82, 46.53),
         (9.73, 46.46), (9.62, 46.45), (9.55, 46.52)]),
 }
@@ -133,7 +134,7 @@ SOURCE = ("Study area as in Figure 1 (SOIUSA II/A-15, II/A-16, II/C-28). Protect
           "Alpinism: multinational inscription (France, Italy, Switzerland).\n"
           "Base map: Natural Earth 1:10m Cultural Vectors (public domain), naturalearthdata.com. "
           "Map: author's elaboration.")
-SOURCE_EXACT = ("Study area as in Figure 1 (SOIUSA II/A-15, II/A-16, II/C-28). Protected areas: {src}.\n"
+SOURCE_EXACT = ("Study area as in Figure 1 (SOIUSA II/A-15, II/A-16, II/C-28).\nProtected areas: {src}.\n"
                 "Transhumance: multinational inscription (Austria, Greece, Italy), Austrian element = Ötztal–Schnals sheep drive. "
                 "Alpinism: multinational inscription (France, Italy, Switzerland).\n"
                 "Base map: Natural Earth 1:10m Cultural Vectors (public domain), naturalearthdata.com. "
@@ -142,13 +143,6 @@ SOURCE_EXACT = ("Study area as in Figure 1 (SOIUSA II/A-15, II/A-16, II/C-28). P
 # ════════════════════════════════════════════════════════════════════════════
 # GLYPHS
 # ════════════════════════════════════════════════════════════════════════════
-
-def park_number(num, kind, size=7.0, pad=0.28):
-    """Text kwargs for a numbered circle; outline in the park category colour."""
-    ec = PARK_KIND[kind]["fc"]
-    return dict(s=str(num), ha="center", va="center", size=size, weight="bold", color=C["text"],
-                bbox=dict(boxstyle=f"circle,pad={pad}", fc="white", ec=ec, lw=1.2))
-
 
 def text_badge(head, sub, colour, head_size=10.5):
     caption = TextArea(sub, textprops=dict(size=7.0, color=C["text"], ha="center",
@@ -176,13 +170,6 @@ class HandlerBox(HandlerBase):
         style = "square,pad=0" if b["boxstyle"].startswith("square") else "round,pad=0,rounding_size=3"
         return [FancyBboxPatch((xd + 2, yd - 1), w - 4, h + 2, boxstyle=style, fc=b["fc"], ec=C["text"],
                                lw=1.0, ls=b.get("ls", "-"), transform=trans)]
-
-
-class HandlerNumber(HandlerBase):
-    def create_artists(self, legend, orig, xd, yd, w, h, fs, trans):
-        r = (h + 3) / 2
-        return [Ellipse((xd + w / 2, yd + h / 2), 2 * r, 2 * r, fc="white", ec=C["text"], lw=1.0,
-                        transform=trans)]
 
 
 def mix(hex_colour, m):
@@ -221,8 +208,8 @@ def main():
 
     plt.rcParams["font.family"] = "DejaVu Sans"
     plt.rcParams["hatch.linewidth"] = 0.5
-    fig = plt.figure(figsize=(11.5, 10.0), facecolor=C["paper"])
-    ax = fig.add_axes([0.14, 0.215, 0.72, 0.594])
+    fig = plt.figure(figsize=(11.5, 9.3), facecolor=C["paper"])
+    ax = fig.add_axes([0.14, 0.165, 0.72, 0.639])
     ax.set_facecolor(C["other"])
 
     # 1 — background admin units
@@ -322,10 +309,19 @@ def main():
     for s in ax.spines.values():
         s.set_edgecolor(C["border_country"]); s.set_linewidth(0.8)
 
-    # 8 — numbered circles on the parks
+    # 8 — park names (leader line to the park when the label sits outside it)
     for key, pk in PARKS.items():
-        x, y = proj(*pk["at"])
-        ax.text(x, y, zorder=8, **park_number(pk["n"], pk["kind"]))
+        txt, (lx, ly) = pk["label"]
+        ec = PARK_KIND[pk["kind"]]["fc"]
+        style = dict(ha="center", va="center", size=7.0, style="italic", weight="bold", color=C["text"],
+                     linespacing=1.05, zorder=8,
+                     path_effects=[pe.withStroke(linewidth=2.4, foreground="white")])
+        if (lx, ly) == pk["at"] or abs(lx - pk["at"][0]) + abs(ly - pk["at"][1]) < 0.06:
+            ax.text(*proj(lx, ly), txt, **style)
+        else:
+            ax.annotate(txt, xy=proj(*pk["at"]), xytext=proj(lx, ly), **style,
+                        arrowprops=dict(arrowstyle="-", color=ec, lw=0.9, shrinkA=4, shrinkB=0))
+            ax.plot(*proj(*pk["at"]), "o", ms=2.6, mfc="white", mec=ec, mew=1.0, zorder=8)
 
     # 9 — margin badges with arrows: quality labels, valley initiative, ICH
     def badge_arrow(pos, tip, colour, ls="-"):
@@ -369,7 +365,7 @@ def main():
                 color=C["text"], arrowprops=dict(arrowstyle="-|>", color=C["text"], lw=1.4), zorder=9)
 
     # 11 — legend (symbols) and park key
-    lab_h, val_h, ich_h, num_h = Patch(), Patch(label="_a"), Patch(label="_b"), Patch(label="_c")
+    lab_h, val_h, ich_h = Patch(), Patch(label="_a"), Patch(label="_b")
     handles = [
         Line2D([], [], color=C["study"], lw=1.5),
         Patch(fc=mix("#7A3E6E", LABEL_MIX_IN), ec="white"),
@@ -385,33 +381,25 @@ def main():
     for kd in PARK_KIND.values():
         handles.append(Patch(fc=kd["fc"], alpha=kd["alpha"], ec=kd["fc"], hatch=kd["hatch"]))
         labels.append(kd["label"])
-    handles += [num_h, lab_h, val_h, ich_h,
+    handles += [ lab_h, val_h, ich_h,
                 Line2D([], [], color=ICH_COLOUR, lw=1.6, ls=(0, (3, 1.4)))]
-    labels += ["Protected area no. (see key)", "Quality label", "Valley initiative",
+    labels += ["Quality label", "Valley initiative",
                "Intangible cultural heritage (UNESCO)", "Transhumance route"]
-    fig.legend(handles, labels, loc="lower center", bbox_to_anchor=(0.5, 0.135), ncol=4, frameon=False,
+    fig.legend(handles, labels, loc="lower center", bbox_to_anchor=(0.5, 0.068), ncol=4, frameon=False,
                fontsize=7.4, handlelength=2.4, handleheight=1.1, columnspacing=1.5, labelcolor=C["text"],
-               handler_map={num_h: HandlerNumber(), lab_h: HandlerBox("label"),
+               handler_map={lab_h: HandlerBox("label"),
                             val_h: HandlerBox("valley"), ich_h: HandlerBox("ich")})
-
-    # park key: three columns
-    items = sorted(PARKS.values(), key=lambda p: p["n"])
-    for i, pk in enumerate(items):
-        ci, ri = divmod(i, 3)
-        xf, yf = 0.20 + ci * 0.215, 0.110 - ri * 0.020
-        fig.text(xf, yf, **park_number(pk["n"], pk["kind"], size=6.6, pad=0.22))
-        fig.text(xf + 0.016, yf, pk["name"], ha="left", va="center", size=7.4, color=C["text"])
 
     # 12 — title + source line
     fig.text(0.5, 0.975, TITLE, ha="center", va="top", size=13.0, weight="bold", color=C["text"])
     if not exact:
         src = SOURCE
     else:
-        nums = sorted(PARKS[k]["n"] for k in exact)
-        if len(nums) == len(PARKS):
+        names = [PARKS[k]["name"] for k in PARKS if k in exact]
+        if len(names) == len(PARKS):
             which = args.parks_source
         else:
-            which = (f"{'no.' if len(nums) == 1 else 'nos.'} {', '.join(map(str, nums))} from {args.parks_source}; "
+            which = (f"{', '.join(names)} from {args.parks_source}; "
                      "others schematic (digitised by hand, accurate to a few km)")
         src = SOURCE_EXACT.format(src=which)
     fig.text(0.5, 0.012, src, ha="center", va="bottom", size=6.6, color=C["muted"], linespacing=1.4)
