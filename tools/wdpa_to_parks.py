@@ -23,12 +23,17 @@ MATCH = [  # (key, substrings in NAME / NAME_ENG, lower case); first hit wins
     ("TEX",  ["tessa", "texel"]),
     ("OTZ",  ["ötztal", "oetztal"]),
     ("KAU",  ["kaunergrat"]),
-    ("BVM",  ["müstair", "muestair", "mustair"]),
+    ("BVM",  ["biosfera val müstair", "biosfera val muestair", "biosphere val müstair", "val müstair biosfera"]),
     ("ELA",  ["ela"]),
 ]
 
 
+MIN_KM2 = 10   # parks in the study area are all far larger; guards against small namesake sites
+
+
 def key_for(row):
+    if (row.get("GIS_AREA") or 0) < MIN_KM2:
+        return None
     name = " ".join(str(row.get(k) or "") for k in ("NAME", "NAME_ENG", "DESIG_ENG")).lower()
     for key, subs in MATCH:
         if any(s in name.split() if s == "ela" else s in name for s in subs):
