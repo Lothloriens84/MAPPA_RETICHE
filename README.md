@@ -40,6 +40,15 @@ python ../heritage_map.py ../ne_data --out Rhaetian_alps_heritage_map
 Protected areas are drawn from schematic outlines in the script. For exact boundaries, export the nine
 parks (e.g. from the WDPA, protectedplanet.net) to one GeoJSON with a `key` property matching the keys in
 `PARKS` (STE, SNP, PNAB, ADA, TEX, OTZ, KAU, BVM, ELA) and add `--parks parks.geojson`.
+`tools/wdpa_to_parks.py` builds that file straight from Protected Planet File Geodatabase (.gdb) downloads,
+with a pure-Python reader (`tools/fgdb.py`, no GDAL needed); parks can be added one download at a time:
+
+```bash
+python tools/wdpa_to_parks.py path/to/WDPA_..._Public_6012.gdb --out output/parks_wdpa.geojson
+cd output && python ../heritage_map.py ../ne_data --parks parks_wdpa.geojson
+```
+
+Parks not in the file keep their schematic outline, and the source line on the map says which are which.
 
 ![Heritage map](output/Rhaetian_alps_heritage_map.png)
 

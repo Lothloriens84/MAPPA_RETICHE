@@ -215,7 +215,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("ne_dir", help="folder with Natural Earth 10m GeoJSON files")
     ap.add_argument("--parks", default=None, help="optional GeoJSON with exact park boundaries ('key' property)")
-    ap.add_argument("--parks-source", default="WDPA, protectedplanet.net",
+    ap.add_argument("--parks-source", default="UNEP-WCMC and IUCN (2026), Protected Planet: WDPA, Nov 2026, protectedplanet.net",
                     help="credit line for --parks data")
     ap.add_argument("--out", default="Rhaetian_alps_heritage_map")
     args = ap.parse_args()
@@ -417,7 +417,16 @@ def main():
 
     # 12 — title + source line
     fig.text(0.5, 0.975, TITLE, ha="center", va="top", size=13.0, weight="bold", color=C["text"])
-    src = SOURCE_EXACT.format(src=args.parks_source) if exact else SOURCE
+    if not exact:
+        src = SOURCE
+    else:
+        nums = sorted(PARKS[k]["n"] for k in exact)
+        if len(nums) == len(PARKS):
+            which = args.parks_source
+        else:
+            which = (f"{'no.' if len(nums) == 1 else 'nos.'} {', '.join(map(str, nums))} from {args.parks_source}; "
+                     "others schematic (digitised by hand, accurate to a few km)")
+        src = SOURCE_EXACT.format(src=which)
     fig.text(0.5, 0.012, src, ha="center", va="bottom", size=6.6, color=C["muted"], linespacing=1.4)
 
     for ext in ("png", "pdf", "svg"):
