@@ -31,8 +31,14 @@ MATCH = [  # (key, substrings in NAME / NAME_ENG, lower case); first hit wins
 MIN_KM2 = 10   # parks in the study area are all far larger; guards against small namesake sites
 
 
+# Overlapping designations that are not the parks themselves (Natura 2000, federal inventories, UNESCO-MAB)
+EXCLUDE_DESIG = ["directive", "inventory", "unesco-mab", "ramsar", "world heritage"]
+
+
 def key_for(row):
     if (row.get("GIS_AREA") or 0) < MIN_KM2:
+        return None
+    if any(x in str(row.get("DESIG_ENG") or "").lower() for x in EXCLUDE_DESIG):
         return None
     name = " ".join(str(row.get(k) or "") for k in ("NAME", "NAME_ENG", "DESIG_ENG")).lower()
     for key, subs in MATCH:
