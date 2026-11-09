@@ -63,4 +63,5 @@ Use `--logos other/folder` to point elsewhere, or `--logos none` for a version w
 - Base map: [Natural Earth](https://www.naturalearthdata.com) 1:10m Cultural Vectors, public domain.
 - Section limits: Marazzi, S. (2005). *Atlante orografico delle Alpi. SOIUSA*. Pavone Canavese: Priuli & Verlucca.
 - Logos: © the respective organisations (DAV, ÖAV, LAV, SAC, CAI, AVS, SAT, Autonome Provinz Bozen – Südtirol), reproduced for identification only. They are **not** covered by the code licence.
+- Protected areas (optional `--parks` input): UNEP-WCMC and IUCN (year), *Protected Planet: The World Database on Protected Areas (WDPA)* [On-line], [month/year], Cambridge, UK: UNEP-WCMC and IUCN. Available at: www.protectedplanet.net. The WDPA licence forbids redistribution, so the boundary file is **not** included in this repository (it is git-ignored); the published map image may carry it with this citation.
 - Code: GNU GPL v3 or later (see `LICENSE`).
