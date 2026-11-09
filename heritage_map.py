@@ -96,9 +96,15 @@ LABELS = {
     "TIR": dict(label="Agrarmarketing\nTirol", sub="Tyrol", colour="#7A3E6E",
                 badge=(0.76, 1.10), tip=(11.25, 47.16)),
     "BZ":  dict(label="Qualität\nSüdtirol", sub="South Tyrol", colour="#B07A1E",
-                badge=(1.115, 0.70), tip=(11.45, 46.70)),
+                badge=(1.115, 0.78), tip=(11.45, 46.70)),
     "TN":  dict(label="Qualità\nTrentino", sub="Trentino", colour="#3A6EA5",
-                badge=(1.115, 0.27), tip=(11.12, 46.33)),
+                badge=(1.115, 0.18), tip=(11.12, 46.33)),
+}
+
+# Park-level quality labels (badge points to the park, no territory tint)
+PARK_LABELS = {
+    "PNAB": dict(label="Qualità\nParco", sub="Adamello Brenta\nNature Park", colour="#4E7D3A",
+                 badge=(1.115, 0.48), tip=(10.97, 46.24)),
 }
 LABEL_MIX_IN, LABEL_MIX_OUT = 0.26, 0.11   # tint strength inside / outside study area
 NEUTRAL_IN = "#ECE9E2"                     # other entity territories, inside study area
@@ -332,7 +338,7 @@ def main():
                     annotation_clip=False, zorder=7)
         ax.plot(tx, ty, "o", ms=3.2, mfc="white", mec=colour, mew=1.2, zorder=8)
 
-    for key, lb in LABELS.items():
+    for key, lb in list(LABELS.items()) + list(PARK_LABELS.items()):
         badge_arrow(lb["badge"], lb["tip"], lb["colour"])
         ax.add_artist(AnnotationBbox(text_badge(lb["label"], lb["sub"], lb["colour"]), lb["badge"],
                                      xycoords="axes fraction", frameon=True, annotation_clip=False,
