@@ -7,7 +7,7 @@ outline and Natural Earth base, with a second layer of actors that also claim
 mountain food in the area as heritage:
 
   * protected areas (national parks, nature parks, Swiss parks of national
-    importance), numbered with red-white-red trail-marker badges,
+    importance), numbered in circles keyed below the map,
   * territorial quality labels, as badges pointing to their territory,
   * a valley initiative (100% Valposchiavo),
   * intangible cultural heritage inscribed by UNESCO (transhumance, alpinism).
@@ -35,9 +35,8 @@ import os
 import matplotlib.pyplot as plt
 from matplotlib.legend_handler import HandlerBase
 from matplotlib.lines import Line2D
-from matplotlib.offsetbox import AnnotationBbox, DrawingArea, TextArea, VPacker
-from matplotlib.patches import PathPatch, FancyBboxPatch, Patch, Rectangle
-from matplotlib.text import Text
+from matplotlib.offsetbox import AnnotationBbox, TextArea, VPacker
+from matplotlib.patches import PathPatch, FancyBboxPatch, Patch, Rectangle, Ellipse
 import matplotlib.patheffects as pe
 
 import rhaetian_map as rm
@@ -49,7 +48,6 @@ from rhaetian_map import (C, STUDY_AREA, TERRITORIES, COUNTRY_LABELS, LI_LABEL, 
 # CONFIG
 # ════════════════════════════════════════════════════════════════════════════
 
-TRAIL_RED = "#C8102E"
 
 # Protected-area categories: fill colour, hatch, legend label
 PARK_KIND = {
@@ -139,17 +137,11 @@ SOURCE_EXACT = ("Study area as in Figure 1 (SOIUSA II/A-15, II/A-16, II/C-28). P
 # GLYPHS
 # ════════════════════════════════════════════════════════════════════════════
 
-def trail_badge(num, w=15, h=13, size=7.0):
-    """Red-white-red Alpine trail marker with a number in the white band."""
-    da = DrawingArea(w, h, 0, 0)
-    band = h / 3
-    da.add_artist(Rectangle((0, 2 * band), w, band, fc=TRAIL_RED, ec="none"))
-    da.add_artist(Rectangle((0, band), w, band, fc="white", ec="none"))
-    da.add_artist(Rectangle((0, 0), w, band, fc=TRAIL_RED, ec="none"))
-    da.add_artist(Rectangle((0, 0), w, h, fc="none", ec="#7A0A1C", lw=0.6))
-    da.add_artist(Text(w / 2, h / 2 - 0.3, str(num), ha="center", va="center", size=size,
-                       weight="bold", color=C["text"]))
-    return da
+def park_number(num, kind, size=7.0, pad=0.28):
+    """Text kwargs for a numbered circle; outline in the park category colour."""
+    ec = PARK_KIND[kind]["fc"]
+    return dict(s=str(num), ha="center", va="center", size=size, weight="bold", color=C["text"],
+                bbox=dict(boxstyle=f"circle,pad={pad}", fc="white", ec=ec, lw=1.2))
 
 
 def text_badge(head, sub, colour, head_size=10.5):
@@ -180,15 +172,11 @@ class HandlerBox(HandlerBase):
                                lw=1.0, ls=b.get("ls", "-"), transform=trans)]
 
 
-class HandlerTrail(HandlerBase):
+class HandlerNumber(HandlerBase):
     def create_artists(self, legend, orig, xd, yd, w, h, fs, trans):
-        bw, bh = h * 1.15, h + 2
-        x0, y0 = xd + (w - bw) / 2, yd - 1
-        out = []
-        for i, fc in enumerate([TRAIL_RED, "white", TRAIL_RED]):
-            out.append(Rectangle((x0, y0 + i * bh / 3), bw, bh / 3, fc=fc, ec="none", transform=trans))
-        out.append(Rectangle((x0, y0), bw, bh, fc="none", ec="#7A0A1C", lw=0.6, transform=trans))
-        return out
+        r = (h + 3) / 2
+        return [Ellipse((xd + w / 2, yd + h / 2), 2 * r, 2 * r, fc="white", ec=C["text"], lw=1.0,
+                        transform=trans)]
 
 
 def mix(hex_colour, m):
@@ -328,10 +316,10 @@ def main():
     for s in ax.spines.values():
         s.set_edgecolor(C["border_country"]); s.set_linewidth(0.8)
 
-    # 8 — numbered trail badges on the parks
+    # 8 — numbered circles on the parks
     for key, pk in PARKS.items():
-        ax.add_artist(AnnotationBbox(trail_badge(pk["n"]), proj(*pk["at"]), frameon=False,
-                                     zorder=8, annotation_clip=False))
+        x, y = proj(*pk["at"])
+        ax.text(x, y, zorder=8, **park_number(pk["n"], pk["kind"]))
 
     # 9 — margin badges with arrows: quality labels, valley initiative, ICH
     def badge_arrow(pos, tip, colour, ls="-"):
@@ -375,7 +363,7 @@ def main():
                 color=C["text"], arrowprops=dict(arrowstyle="-|>", color=C["text"], lw=1.4), zorder=9)
 
     # 11 — legend (symbols) and park key
-    lab_h, val_h, ich_h, trail_h = Patch(), Patch(label="_a"), Patch(label="_b"), Patch(label="_c")
+    lab_h, val_h, ich_h, num_h = Patch(), Patch(label="_a"), Patch(label="_b"), Patch(label="_c")
     handles = [
         Line2D([], [], color=C["study"], lw=1.5),
         Patch(fc=mix("#7A3E6E", LABEL_MIX_IN), ec="white"),
@@ -391,28 +379,21 @@ def main():
     for kd in PARK_KIND.values():
         handles.append(Patch(fc=kd["fc"], alpha=kd["alpha"], ec=kd["fc"], hatch=kd["hatch"]))
         labels.append(kd["label"])
-    handles += [trail_h, lab_h, val_h, ich_h,
+    handles += [num_h, lab_h, val_h, ich_h,
                 Line2D([], [], color=ICH_COLOUR, lw=1.6, ls=(0, (3, 1.4)))]
     labels += ["Protected area no. (see key)", "Quality label", "Valley initiative",
                "Intangible cultural heritage (UNESCO)", "Transhumance route"]
     fig.legend(handles, labels, loc="lower center", bbox_to_anchor=(0.5, 0.135), ncol=4, frameon=False,
                fontsize=7.4, handlelength=2.4, handleheight=1.1, columnspacing=1.5, labelcolor=C["text"],
-               handler_map={trail_h: HandlerTrail(), lab_h: HandlerBox("label"),
+               handler_map={num_h: HandlerNumber(), lab_h: HandlerBox("label"),
                             val_h: HandlerBox("valley"), ich_h: HandlerBox("ich")})
 
-    # park key: three columns (badges drawn directly in figure coordinates)
+    # park key: three columns
     items = sorted(PARKS.values(), key=lambda p: p["n"])
-    W, H = fig.get_size_inches()
-    bw, bh = 15 / 72 / W, 13 / 72 / H
     for i, pk in enumerate(items):
         ci, ri = divmod(i, 3)
         xf, yf = 0.20 + ci * 0.215, 0.110 - ri * 0.020
-        for j, fc in enumerate([TRAIL_RED, "white", TRAIL_RED]):
-            fig.add_artist(Rectangle((xf - bw / 2, yf - bh / 2 + j * bh / 3), bw, bh / 3, fc=fc, ec="none",
-                                     transform=fig.transFigure))
-        fig.add_artist(Rectangle((xf - bw / 2, yf - bh / 2), bw, bh, fc="none", ec="#7A0A1C", lw=0.6,
-                                 transform=fig.transFigure))
-        fig.text(xf, yf, str(pk["n"]), ha="center", va="center", size=6.6, weight="bold", color=C["text"])
+        fig.text(xf, yf, **park_number(pk["n"], pk["kind"], size=6.6, pad=0.22))
         fig.text(xf + 0.016, yf, pk["name"], ha="left", va="center", size=7.4, color=C["text"])
 
     # 12 — title + source line
