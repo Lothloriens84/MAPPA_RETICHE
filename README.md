@@ -1,7 +1,9 @@
 # MAPPA_RETICHE
 
-Source code for **Figure 1: The Rhaetian Alps: regional boundaries and hut-governing entities**
-(PhD thesis, *Food Heritage: Cultures and Identities*, University of Coimbra).
+Source code for two maps of the PhD thesis (*Food Heritage: Cultures and Identities*, University of Coimbra):
+
+- **Figure 1: The Rhaetian Alps: regional boundaries and hut-governing entities** (`rhaetian_map.py`)
+- **The Rhaetian Alps: heritage claims on mountain food beyond the hut-governing entities** (`heritage_map.py`)
 
 ![Figure 1](output/F1_Rhaetian_alps_map.png)
 
@@ -13,7 +15,8 @@ hut-governing entities (seven alpine clubs and one public authority) own or oper
 
 | Path | What it is |
 |---|---|
-| `rhaetian_map.py` | The script. All settings (outline, territories, labels, colours) are in its CONFIG section. |
+| `rhaetian_map.py` | Figure 1. All settings (outline, territories, labels, colours) are in its CONFIG section. |
+| `heritage_map.py` | Companion map: protected areas, territorial quality labels, valley initiatives and UNESCO intangible heritage on the Figure 1 base. Imports the base settings from `rhaetian_map.py`. |
 | `ne_data/` | Natural Earth 1:10m boundaries, trimmed to the Alpine area (7.5–14.2°E, 44.3–48.9°N). |
 | `logos/` | Entity logos (PNG, trimmed), named by entity key: LAV, SAC, CAI, DAV, OEAV, AVS, APS, SAT. |
 | `output/` | The rendered figure (PDF, PNG at 300 dpi, SVG). |
@@ -27,6 +30,28 @@ cd output
 python ../rhaetian_map.py ../ne_data --out F1_Rhaetian_alps_map
 ```
 
+Heritage map:
+
+```bash
+cd output
+python ../heritage_map.py ../ne_data --out Rhaetian_alps_heritage_map
+```
+
+Protected areas are drawn from schematic outlines in the script. For exact boundaries, export the nine
+parks (e.g. from the WDPA, protectedplanet.net) to one GeoJSON with a `key` property matching the keys in
+`PARKS` (STE, SNP, PNAB, ADA, TEX, OTZ, KAU, BVM, ELA) and add `--parks parks.geojson`.
+`tools/wdpa_to_parks.py` builds that file straight from Protected Planet File Geodatabase (.gdb) downloads,
+with a pure-Python reader (`tools/fgdb.py`, no GDAL needed); parks can be added one download at a time:
+
+```bash
+python tools/wdpa_to_parks.py path/to/WDPA_..._Public_6012.gdb --out output/parks_wdpa.geojson
+cd output && python ../heritage_map.py ../ne_data --parks parks_wdpa.geojson
+```
+
+Parks not in the file keep their schematic outline, and the source line on the map says which are which.
+
+![Heritage map](output/Rhaetian_alps_heritage_map.png)
+
 Logos are read from `logos/` next to the script and drawn above each entity's box.
 Use `--logos other/folder` to point elsewhere, or `--logos none` for a version without logos.
 
@@ -37,6 +62,8 @@ Use `--logos other/folder` to point elsewhere, or `--logos none` for a version w
   approximate (a few km) and not an official SOIUSA boundary dataset.
 - **Projection.** Equirectangular, with longitude scaled by the cosine of the map's middle
   latitude (≈46.6°N). The scale bar is therefore approximate.
+- **Protected areas (heritage map).** Nine outlines digitised by hand around towns, valleys and passes,
+  accurate to a few km; schematic, not official boundaries, until replaced with `--parks`.
 - **Shading.** Each operating territory is shown pale in full, and in full colour where it lies
   inside the study area.
 
@@ -45,4 +72,5 @@ Use `--logos other/folder` to point elsewhere, or `--logos none` for a version w
 - Base map: [Natural Earth](https://www.naturalearthdata.com) 1:10m Cultural Vectors, public domain.
 - Section limits: Marazzi, S. (2005). *Atlante orografico delle Alpi. SOIUSA*. Pavone Canavese: Priuli & Verlucca.
 - Logos: © the respective organisations (DAV, ÖAV, LAV, SAC, CAI, AVS, SAT, Autonome Provinz Bozen – Südtirol), reproduced for identification only. They are **not** covered by the code licence.
+- Protected areas (optional `--parks` input): UNEP-WCMC and IUCN (year), *Protected Planet: The World Database on Protected Areas (WDPA)* [On-line], [month/year], Cambridge, UK: UNEP-WCMC and IUCN. Available at: www.protectedplanet.net. The WDPA licence forbids redistribution, so the boundary file is **not** included in this repository (it is git-ignored); the published map image may carry it with this citation.
 - Code: GNU GPL v3 or later (see `LICENSE`).
