@@ -1,0 +1,89 @@
+no,hut_id,name,name_de_fr,entity,subsection_code,subsection,altitude_m,beds,position
+1,CAI-023,Rifugio Bertacchi,,CAI,II/A-15.I,1. Oberhalbstein Range,2175,,database
+2,CAI-022,Rifugio Chiavenna all'Alpe Angeloga,,CAI,II/A-15.I,1. Oberhalbstein Range,2204,,database
+3,SAC-002,Chamanna da Kesch / Keschhütte,Keschhütte,SAC,II/A-15.II,2. Albula Alps,2632,50,estimate
+4,SAC-004,Chamanna d'Es-cha,Es-cha Hütte,SAC,II/A-15.II,2. Albula Alps,2594,60,estimate
+5,SAC-007,Chamanna da Grialetsch,Grialetschhütte,SAC,II/A-15.II,2. Albula Alps,2542,60,estimate
+6,CAI-021,Rifugio Gianetti,,CAI,II/A-15.III,3. Bernina Range,2534,,estimate
+7,CAI-018,Rifugio Allievi Bonacossa,,CAI,II/A-15.III,3. Bernina Range,2358,,estimate
+8,CAI-016,Rifugio Ponti,,CAI,II/A-15.III,3. Bernina Range,2559,,estimate
+9,CAI-019,Rifugio Longoni,,CAI,II/A-15.III,3. Bernina Range,2450,,estimate
+10,SAC-003,Chamanna da Coaz,Coazhütte,SAC,II/A-15.III,3. Bernina Range,2610,80,estimate
+11,CAI-011,Rifugio Carate Brianza,,CAI,II/A-15.III,3. Bernina Range,2636,,database
+12,CAI-010,Rifugio Marinelli-Bombardieri al Bernina,,CAI,II/A-15.III,3. Bernina Range,2813,100,database
+13,CAI-008,Rifugio Marco e Rosa,,CAI,II/A-15.III,3. Bernina Range,3610,48,estimate
+14,SAC-001,Chamanna de Boval /Bovalhütte,Bovalhütte,SAC,II/A-15.III,3. Bernina Range,2632,50,estimate
+15,CAI-009,Rifugio Bignami,,CAI,II/A-15.III,3. Bernina Range,2041,70,estimate
+16,SAC-011,Chamanna Segantini / Segantinihütte,Segantinihütte,SAC,II/A-15.IV,4. Livigno Range,2731,60,estimate
+17,SAC-012,Chamonna Lischana/ Lischanahütte,Lischanahütte,SAC,II/A-15.V,5. Sesvenna Range,,49,estimate
+18,AVS-004,Rifugio Sesvenna,Sesvennahütte,AVS,II/A-15.V,5. Sesvenna Range,2258,28,database
+19,SAC-008,Linard-Hütte,Linard-Hütte,SAC,II/A-15.VI,"6. Silvretta, Samnaun, Verwall",2328,50,estimate
+20,DAV-004,Saarbrücker Hütte,Saarbrücker Hütte,DAV,II/A-15.VI,"6. Silvretta, Samnaun, Verwall",2538,50,estimate
+21,DAV-005,Konstanzer Hütte,Konstanzer Hütte,DAV,II/A-15.VI,"6. Silvretta, Samnaun, Verwall",1692,60,estimate
+22,DAV-001,Wiesbadener Hütte,Wiesbadener Hütte,DAV,II/A-15.VI,"6. Silvretta, Samnaun, Verwall",2443,120,estimate
+23,SAC-005,Chamanna Tuoi,Tuoihütte,SAC,II/A-15.VI,"6. Silvretta, Samnaun, Verwall",2250,50,estimate
+24,DAV-003,Jamtalhütte,Jamtalhütte,DAV,II/A-15.VI,"6. Silvretta, Samnaun, Verwall",2165,100,estimate
+25,DAV-002,Heidelberger Hütte,Heidelberger Hütte,DAV,II/A-15.VI,"6. Silvretta, Samnaun, Verwall",2264,80,estimate
+26,SAC-010,Heidelberger Hütte (SAC),Heidelberger Hütte,SAC,II/A-15.VI,"6. Silvretta, Samnaun, Verwall",2264,80,estimate
+27,LBV-001,Pfälzerhütte,Pfälzerhütte,LAV,II/A-15.VIII,8. Rätikon,2108,80,database
+28,LBV-002,Sücka,Sücka,LAV,II/A-15.VIII,8. Rätikon,1467,30,estimate
+29,DAV-007,Totalphütte,Totalphütte,DAV,II/A-15.VIII,8. Rätikon,2385,60,estimate
+30,DAV-008,Douglashütte,Douglashütte,DAV,II/A-15.VIII,8. Rätikon,1979,60,estimate
+31,DAV-006,Mannheimer Hütte,Mannheimer Hütte,DAV,II/A-15.VIII,8. Rätikon,2679,50,estimate
+32,AVS-002,Rifugio Oberettes,Oberetteshütte,AVS,II/A-16.I,9. Ötztal Alps,,46,estimate
+33,APB-004,Rifugio Pio XI alla Palla Bianca,Weisskugelhütte,APS,II/A-16.I,9. Ötztal Alps,2557,48,database
+34,OeAV-004,Brandenburger Haus,Brandenburger Haus,ÖAV,II/A-16.I,9. Ötztal Alps,3272,30,database
+35,OeAV-002,Rifugio Hochjochhospiz,Hochjochhospiz,ÖAV,II/A-16.I,9. Ötztal Alps,2412,60,database
+36,OeAV-003,Rifugio Similaun / Similaunhütte,Similaunhütte,ÖAV,II/A-16.I,9. Ötztal Alps,3017,90,database
+37,OeAV-001,Capanna Martino Bussi / Martin Busch Hütte,Martin Busch Hütte,ÖAV,II/A-16.I,9. Ötztal Alps,2501,100,database
+38,APB-001,Rifugio Cima Fiammante,Lodnerhütte,APS,II/A-16.I,9. Ötztal Alps,2262,60,database
+39,APB-002,Rifugio Petrarca all'Altissimo,Stettiner Hütte,APS,II/A-16.I,9. Ötztal Alps,2875,70,database
+40,APB-003,Rifugio Plan,Zwickauer Hütte,APS,II/A-16.I,9. Ötztal Alps,2989,60,database
+41,OeAV-008,Rifugio Innsbruck / Innsbrucker Hütte,Innsbrucker Hütte,ÖAV,II/A-16.II,10. Stubai Alps,2369,80,database
+42,OeAV-006,Rifugio Sulzenau / Sulzenauhütte,Sulzenauhütte,ÖAV,II/A-16.II,10. Stubai Alps,2191,90,database
+43,OeAV-005,Rifugio Franz Senn / Franz-Senn-Hütte,Franz-Senn-Hütte,ÖAV,II/A-16.II,10. Stubai Alps,2147,120,database
+44,APB-006,Rifugio Cima Libera,Müllerhütte,APS,II/A-16.II,10. Stubai Alps,3145,,estimate
+45,OeAV-009,Rifugio Cima Libera / Cima Libera Hütte,Cima Libera Hütte,ÖAV,II/A-16.II,10. Stubai Alps,3145,40,estimate
+46,APB-008,Rifugio Biasi al Bicchiere,Becherhaus,APS,II/A-16.II,10. Stubai Alps,3195,,estimate
+47,APB-009,Rifugio Vedretta Pendente,Teplitzer Hütte,APS,II/A-16.II,10. Stubai Alps,2586,,estimate
+48,APB-010,Rifugio Vedretta Piana,Grohmannhütte,APS,II/A-16.II,10. Stubai Alps,2254,,estimate
+49,OeAV-007,Rifugio Brema / Bremer Hütte,Bremer Hütte,ÖAV,II/A-16.II,10. Stubai Alps,2413,80,database
+50,AVS-005,Rifugio Merano,Meraner Hütte,AVS,II/A-16.III,11. Sarntal Alps,1999,,estimate
+51,CAI-017,Rifugio Berni,,CAI,II/C-28.I,12. Ortler Alps,2541,,estimate
+52,CAI-020,Rifugio Bozzi,,CAI,II/C-28.I,12. Ortler Alps,2478,,estimate
+53,APB-012,Rifugio Payer,Payerhütte,APS,II/C-28.I,12. Ortler Alps,3029,,estimate
+54,CAI-012,Rifugio Quinto Alpini,,CAI,II/C-28.I,12. Ortler Alps,2878,,estimate
+55,CAI-005,Rifugio Branca-Martinelli,,CAI,II/C-28.I,12. Ortler Alps,2493,80,estimate
+56,CAI-006,Rifugio Città di Milano,,CAI,II/C-28.I,12. Ortler Alps,2660,60,estimate
+57,APB-013,Rifugio Città di Milano,Schaubachhütte,APS,II/C-28.I,12. Ortler Alps,2581,,estimate
+58,CAI-013,Rifugio Pizzini,,CAI,II/C-28.I,12. Ortler Alps,2706,,estimate
+59,APB-005,Rifugio Serristori,Düsseldorferhütte,APS,II/C-28.I,12. Ortler Alps,2721,,estimate
+60,SAT-008,Rifugio Stavel,,SAT,II/C-28.I,12. Ortler Alps,1303,50,estimate
+61,SAT-014,Rifugio Vioz,,SAT,II/C-28.I,12. Ortler Alps,3535,80,estimate
+62,APB-011,Rifugio Nino Corsi,Zufallhütte,APS,II/C-28.I,12. Ortler Alps,2265,,estimate
+63,SAT-002,Rifugio Cevedale,,SAT,II/C-28.I,12. Ortler Alps,2608,50,database
+64,AVS-001,Rifugio Martello,Marteller Hütte,AVS,II/C-28.I,12. Ortler Alps,2610,40,database
+65,SAT-007,Rifugio Saent,,SAT,II/C-28.I,12. Ortler Alps,1718,60,estimate
+66,CAI-004,Rifugio Sandro Occhi,,CAI,II/C-28.III,14. Adamello-Presanella Alps,,50,estimate
+67,CAI-003,Rifugio Tonolini,,CAI,II/C-28.III,14. Adamello-Presanella Alps,2449,70,estimate
+68,CAI-001,Rifugio Gnutti,,CAI,II/C-28.III,14. Adamello-Presanella Alps,2166,50,estimate
+69,CAI-002,Rifugio Garibaldi,,CAI,II/C-28.III,14. Adamello-Presanella Alps,2550,98,estimate
+70,CAI-007,Rifugio Lobbia Alta,,CAI,II/C-28.III,14. Adamello-Presanella Alps,3020,60,estimate
+71,SAT-005,Rifugio Mandron,,SAT,II/C-28.III,14. Adamello-Presanella Alps,2449,100,database
+72,SAT-013,Rifugio Val di Fumo,,SAT,II/C-28.III,14. Adamello-Presanella Alps,1918,60,estimate
+73,SAT-001,Rifugio Carè Alto,,SAT,II/C-28.III,14. Adamello-Presanella Alps,2450,74,database
+74,SAT-012,Rifugio Segantini,,SAT,II/C-28.III,14. Adamello-Presanella Alps,2383,60,estimate
+75,SAT-015,Rifugio XII Apostoli,,SAT,II/C-28.IV,15. Brenta Dolomites,2489,60,estimate
+76,SAT-011,Rifugio Agostini,,SAT,II/C-28.IV,15. Brenta Dolomites,2410,60,estimate
+77,SAT-003,Rifugio Tuckett e Sella,,SAT,II/C-28.IV,15. Brenta Dolomites,2272,100,database
+78,SAT-004,Rifugio Graffer,,SAT,II/C-28.IV,15. Brenta Dolomites,2261,80,database
+79,SAT-010,Rifugio Tosa–Pedrotti,,SAT,II/C-28.IV,15. Brenta Dolomites,2485,120,estimate
+80,SAT-006,Rifugio Peller,,SAT,II/C-28.IV,15. Brenta Dolomites,2022,50,estimate
+81,SAC-006,Capanna Zapport / Zapporthütte,Zapporthütte,SAC,,,2222,60,estimate
+82,SAT-009,Rifugio Stivo,,SAT,,,1534,60,estimate
+,AVS-003,Rifugio Lago Rotondo,Radlseehütte,AVS,,,,40,not located
+,CAI-014,Rifugio Del Grande-Camerini,,CAI,,,2508,,not located
+,CAI-015,Rifugio Maria e Franco,,CAI,,,2557,,not located
+,SAC-009,Chamanna dal Fuorn,Ofenhütte,SAC,,,1794,50,not located
+,APB-007,Rifugio Forcella Vallaga,Flaggerschartenhütte-Marburger Hütte,APS,,,2480,,not located
+,APB-014,Rifugio Borletti,Berglhütte,APS,,,2188,,not located

@@ -13,6 +13,10 @@ ETRS89-LAEA projection. It adds one marker per hut of the eight hut-governing en
 - **size** = beds (< 40, 40–80, > 80);
 - **filled** = position from the hut database; **hollow** = estimated position, still to be verified;
 - a **table** of huts per territory and entity, with the territory found from each hut's position.
+- a **number** next to each hut, assigned by SOIUSA subsection (1–15, from the SOIUSA polygons) and from west to
+  east within it; huts outside the polygons come last. The key to the numbers is written alongside the map as
+  `output/Rhaetian_alps_huts_map_list.pdf` (A4, for the thesis annex) and `..._list.csv` (number, ID, names,
+  entity, subsection, altitude, beds, position source; unlocated huts listed without a number).
 
 ## Contents
 

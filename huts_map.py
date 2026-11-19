@@ -20,6 +20,9 @@ data/huts.csv is built from the hut workbook with tools/huts_from_workbook.py.
 import argparse
 import csv
 import os
+import re
+
+from matplotlib.backends.backend_pdf import PdfPages
 
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -57,6 +60,99 @@ def read_huts(path):
     huts = [r for r in rows if r["lat"] and r["lon"]]
     missing = [r for r in rows if not (r["lat"] and r["lon"])]
     return huts, missing
+
+
+# Subsection numbers and English names (as on the SOIUSA map)
+SUBSECTION_NAMES = {
+    "II/A-15.I": (1, "Oberhalbstein Range"), "II/A-15.II": (2, "Albula Alps"), "II/A-15.III": (3, "Bernina Range"),
+    "II/A-15.IV": (4, "Livigno Range"), "II/A-15.V": (5, "Sesvenna Range"),
+    "II/A-15.VI": (6, "Silvretta, Samnaun, Verwall"), "II/A-15.VII": (7, "Plessur Range"),
+    "II/A-15.VIII": (8, "Rätikon"), "II/A-16.I": (9, "Ötztal Alps"), "II/A-16.II": (10, "Stubai Alps"),
+    "II/A-16.III": (11, "Sarntal Alps"), "II/C-28.I": (12, "Ortler Alps"), "II/C-28.II": (13, "Nonstal Alps"),
+    "II/C-28.III": (14, "Adamello-Presanella Alps"), "II/C-28.IV": (15, "Brenta Dolomites"),
+}
+NUM_SIZE = 6.8               # hut number font size (pt)
+
+
+def subsection_of(lon, lat, soiusa):
+    """SOIUSA subsection code of a point, or None if outside the polygons."""
+    x, y = proj(lon, lat)
+    for f in soiusa or []:
+        if rm.geom_to_path(f["geometry"]).contains_point((x, y)):
+            m = re.match(r"(II/[A-C]-\d+\.[IVX]+)", f["properties"]["CODICE"].strip())
+            return m.group(1) if m else None
+    return None
+
+
+def place_numbers(ax, items, fs=NUM_SIZE):
+    """Greedy label placement: each number goes to the free side of its marker.
+    items: list of (x, y, text, colour, marker_size_pt)."""
+    fig = ax.figure
+    fig.canvas.draw()
+    to_pt = 72.0 / fig.dpi
+    pos = [(ax.transData.transform((x, y)) * to_pt) for x, y, *_ in items]
+    markers = [(p[0], p[1], it[4] / 2 + 0.5) for p, it in zip(pos, items)]
+    boxes = []
+
+    def overlap(b1, b2):
+        return max(0, min(b1[2], b2[2]) - max(b1[0], b2[0])) * max(0, min(b1[3], b2[3]) - max(b1[1], b2[1]))
+
+    for (px, py), (x, y, txt, col, ms) in zip(pos, items):
+        w, h = len(txt) * fs * 0.52, fs * 0.8
+        r = ms / 2 + 1.2
+        best = None
+        for dx, dy, ha, va in [(r, 0, "left", "center"), (-r, 0, "right", "center"), (0, r, "center", "bottom"),
+                               (0, -r, "center", "top"), (r * .75, r * .75, "left", "bottom"),
+                               (-r * .75, r * .75, "right", "bottom"), (r * .75, -r * .75, "left", "top"),
+                               (-r * .75, -r * .75, "right", "top")]:
+            bx0 = px + dx - (w if ha == "right" else w / 2 if ha == "center" else 0)
+            by0 = py + dy - (h if va == "top" else h / 2 if va == "center" else 0)
+            box = (bx0, by0, bx0 + w, by0 + h)
+            cost = sum(overlap(box, b) for b in boxes)
+            cost += sum(overlap(box, (mx - mr, my - mr, mx + mr, my + mr)) for mx, my, mr in markers) * 0.8
+            if best is None or cost < best[0]:
+                best = (cost, dx, dy, ha, va, box)
+        _, dx, dy, ha, va, box = best
+        boxes.append(box)
+        ax.annotate(txt, (x, y), xytext=(dx, dy), textcoords="offset points", ha=ha, va=va, size=fs,
+                    weight="bold", color=col, zorder=12,
+                    path_effects=[pe.withStroke(linewidth=2.0, foreground="white")])
+
+
+def write_annex(rows, missing, csv_path, pdf_path):
+    """Hut list for the thesis annex: CSV and an A4 PDF table."""
+    cols = ["no", "hut_id", "name", "name_de_fr", "entity", "subsection_code", "subsection", "altitude_m", "beds",
+            "position"]
+    with open(csv_path, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=cols); w.writeheader(); w.writerows(rows)
+        for m in missing:
+            w.writerow(dict(no="", hut_id=m["hut_id"], name=m["name"], name_de_fr=m["name_de_fr"],
+                            entity=ENTITIES[m["entity"]]["label"], subsection_code="", subsection="",
+                            altitude_m=m["altitude_m"], beds=m["beds"], position="not located"))
+    head = ["No.", "Hut", "Entity", "SOIUSA subsection", "Alt. (m)", "Beds", "Position"]
+    body = [[str(r["no"]), (r["name"] + (f" / {r['name_de_fr']}" if r["name_de_fr"] and r["name_de_fr"] != r["name"] else ""))[:58],
+             r["entity"], r["subsection"] if r["subsection"] else "outside the study area", str(r["altitude_m"]),
+             str(r["beds"]), r["position"]] for r in rows]
+    body += [["–", (m["name"] or "")[:58], ENTITIES[m["entity"]]["label"], "", str(m["altitude_m"]), str(m["beds"]),
+              "not located"] for m in missing]
+    per = 44
+    with PdfPages(pdf_path) as pdf:
+        for i in range(0, len(body), per):
+            fig = plt.figure(figsize=(8.27, 11.69))
+            fig.text(0.07, 0.955, "Mountain huts of the hut-governing entities in the Rhaetian Alps: key to the numbers "
+                     "on the hut map", size=11, weight="bold", va="top")
+            fig.text(0.07, 0.93, "Numbered by SOIUSA subsection, west to east. Position: database = from the hut "
+                     "database; estimate = to be verified.", size=8.5, va="top", color=C["muted"])
+            ax = fig.add_axes([0.07, 0.04, 0.86, 0.87]); ax.axis("off")
+            t = ax.table(cellText=body[i:i + per], colLabels=head, loc="upper center", cellLoc="left",
+                         colWidths=[0.05, 0.42, 0.07, 0.24, 0.07, 0.05, 0.10])
+            t.auto_set_font_size(False); t.set_fontsize(7.6); t.scale(1, 1.18)
+            for (r, c), cl in t.get_celld().items():
+                cl.set_edgecolor("#D9D4CA"); cl.set_linewidth(0.4)
+                if r == 0:
+                    cl.get_text().set_weight("bold"); cl.set_facecolor("#F1EEE8")
+            fig.text(0.93, 0.02, f"{i // per + 1}", size=8, ha="right")
+            pdf.savefig(fig); plt.close(fig)
 
 
 def beds_size(b):
@@ -102,6 +198,15 @@ def main():
                 geoms[key] = rm.geom_to_path(f["geometry"])
     study_paths = rm.study_area_paths(soiusa)
 
+    # number huts: by SOIUSA subsection (1-15), west to east within it; huts outside the polygons last
+    for h in huts:
+        h["_sub"] = subsection_of(float(h["lon"]), float(h["lat"]), soiusa)
+        h["_x"] = proj(float(h["lon"]), float(h["lat"]))[0]
+    huts.sort(key=lambda h: (SUBSECTION_NAMES[h["_sub"]][0] if h["_sub"] else 99, h["_x"]))
+    for i, h in enumerate(huts, 1):
+        h["_no"] = i
+    num_items = []
+
     # position duplicates (same hut under two entities) side by side
     seen = {}
     for h in huts:
@@ -120,12 +225,14 @@ def main():
             ms = beds_size(h["beds"])
             ax.plot(x, y, marker, ms=ms, mfc="white" if est else a["colour"], mec=a["ink"] if est else C["text"],
                     mew=1.6 if est else 0.7, zorder=10 + (0 if est else 1))
+            num_items.append((x, y, str(h["_no"]), a["ink"], ms))
             terr = next((t for t, p in geoms.items() if p.contains_point((x0, y0))), "other")
             counts[(terr, h["entity"])] = counts.get((terr, h["entity"]), 0) + 1
             inside[h["entity"]] = inside.get(h["entity"], 0) + int(any(p.contains_point((x0, y0)) for p in study_paths))
 
     rm.draw_scale_north(ax, FRAME, km=25)
     rm.draw_locator(fig, ax, args.ne_dir, FRAME, width=0.17)
+    place_numbers(ax, num_items)
 
     # legend: entities with counts, then symbols
     ents = [k for k in ENTITIES if any(h["entity"] == k for h in huts)]
@@ -186,6 +293,12 @@ def main():
 
     for ext in ("png", "pdf", "svg"):
         fig.savefig(f"{args.out}.{ext}", dpi=300, facecolor=fig.get_facecolor())
+    rows = [dict(no=h["_no"], hut_id=h["hut_id"], name=h["name"], name_de_fr=h["name_de_fr"],
+                 entity=ENTITIES[h["entity"]]["label"], subsection_code=h["_sub"] or "",
+                 subsection=f"{SUBSECTION_NAMES[h['_sub']][0]}. {SUBSECTION_NAMES[h['_sub']][1]}" if h["_sub"] else "",
+                 altitude_m=h["altitude_m"], beds=h["beds"],
+                 position="estimate" if h["coord_source"].startswith("estimate") else "database") for h in huts]
+    write_annex(rows, missing, f"{args.out}_list.csv", f"{args.out}_list.pdf")
     print("saved", args.out + ".{png,pdf,svg}", "| huts drawn:", len(huts), "| missing:", len(missing),
           "| inside study area:", sum(inside.values()))
 
