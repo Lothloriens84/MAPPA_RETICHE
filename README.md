@@ -1,9 +1,10 @@
 # MAPPA_RETICHE
 
-Source code for three maps of the PhD thesis (*Food Heritage: Cultures and Identities*, University of Coimbra):
+Source code for four maps of the PhD thesis (*Food Heritage: Cultures and Identities*, University of Coimbra):
 
 - **Figure 1: The Rhaetian Alps: regional boundaries and hut-governing entities** (`rhaetian_map.py`)
 - **The Rhaetian Alps: mountain huts of the hut-governing entities** (`huts_map.py`, see `README_huts.md`)
+- **The Rhaetian Alps: SOIUSA classification and the hut-governing territories** (`alps_map.py`)
 - **The Rhaetian Alps: heritage claims on mountain food beyond the hut-governing entities** (`heritage_map.py`)
 
 ![Figure 1](output/F1_Rhaetian_alps_map.png)
@@ -24,6 +25,7 @@ locator in the top-left corner shows where the study area lies in Europe.
 | Path | What it is |
 |---|---|
 | `rhaetian_map.py` | Figure 1. All settings (outline, territories, labels, colours) are in its CONFIG section. |
+| `alps_map.py` | SOIUSA map (A3 landscape, with relief): sections and their 15 subsections over the entity territories, and a table of the territories each subsection lies in (`SUBSECTIONS` in the script). |
 | `huts_map.py` | Hut map: one marker per hut from `data/huts.csv` on the Figure 1 base, with a count table. See `README_huts.md`. |
 | `data/huts.csv` | Hut table (no personal contacts), built by `tools/huts_from_workbook.py`. |
 | `heritage_map.py` | Companion map: protected areas, territorial quality labels, valley initiatives and UNESCO intangible heritage on the Figure 1 base. Imports the base settings from `rhaetian_map.py`. |
@@ -38,6 +40,13 @@ locator in the top-left corner shows where the study area lies in Europe.
 pip install -r requirements.txt
 cd output
 python ../rhaetian_map.py ../ne_data --out F1_Rhaetian_alps_map
+```
+
+SOIUSA map:
+
+```bash
+cd output
+python ../alps_map.py ../ne_data
 ```
 
 Hut map:
@@ -95,7 +104,7 @@ Use `--logos other/folder` to point elsewhere, or `--logos none` for a version w
   AVS: Bolzano; Autonomous Province: Bolzano; SAT: Trento (from each entity's own website or statute,
   November 2026). Milan, Bern and Munich lie beyond the Figure 1 frame and are shown by edge arrows with the distance from the map edge.
 - **Locator.** Europe from Natural Earth 1:10m countries, simplified (Douglas–Peucker, 0.04°).
-- **Relief (hut map only).** Hillshade (sun from the north-west, 45°) computed from Copernicus DEM GLO-90 tiles (N45–N48,
+- **Relief (hut map and SOIUSA map).** Hillshade (sun from the north-west, 45°) computed from Copernicus DEM GLO-90 tiles (N45–N48,
   E007–E012) and resampled to the ETRS89-LAEA grid at 250 m by `tools/dem_hillshade.py`
   (`ne_data/hillshade_laea.png`). The raw DEM tiles are not included; download them from the public
   `copernicus-dem-90m` bucket and rerun the tool. Copernicus DEM © DLR e.V. 2010–2014 and © Airbus Defence and
