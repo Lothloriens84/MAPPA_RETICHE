@@ -1,0 +1,89 @@
+hut_id,name,name_de_fr,entity,section,country,region,mountain_group,altitude_m,beds,provisioning,access,status,raetian_scope,lat,lon,coord_source
+SAT-001,Rifugio Carè Alto,,SAT,SAT Centrale,Italy,Trentino-Alto Adige,Adamello–Presanella,2450,74,Helicopter,On foot >3h / Helicopter,Active,Yes,46.107746,10.626153,workbook
+SAT-002,Rifugio Cevedale,,SAT,SAT / SAT Pejo,Italy,Trentino-Alto Adige,Ortles–Cevedale,2608,50,Pulley / Helicopter,On foot 1–3h,Active,Yes,46.436984,10.666092,workbook
+SAT-003,Rifugio Tuckett e Sella,,SAT,SAT Centrale,Italy,Trentino-Alto Adige,Brenta Dolomites,2272,100,Pulley,On foot / Cable car,Active,Yes,46.192051,10.881996,workbook
+SAT-004,Rifugio Graffer,,SAT,SAT Centrale,Italy,Trentino-Alto Adige,Brenta Dolomites,2261,80,Cable car,Cable car,Active,Yes,46.219752,10.889243,workbook
+SAT-005,Rifugio Mandron,,SAT,SAT Centrale,Italy,Trentino-Alto Adige,Adamello–Presanella,2449,100,Pulley / Helicopter,On foot 1–3h / Helicopter,Active,Yes,46.202584,10.571169,workbook
+SAT-006,Rifugio Peller,,SAT,SAT Cles,Italy,Trentino-Alto Adige,Brenta–Adamello border,2022,50,Mixed,On foot 1–3h,Active,Borderline,46.346,11.0,estimate
+SAT-007,Rifugio Saent,,SAT,SAT Rabbì,Italy,Trentino-Alto Adige,Ortles–Cevedale,1718,60,Mixed,On foot 1–3h,Active,Yes,46.444,10.771,estimate
+SAT-008,Rifugio Stavel,,SAT,SAT Malè,Italy,Trentino-Alto Adige,Adamello–Presanella,1303,50,Road / path,On foot <1h,Active,Yes,46.266,10.622,estimate
+SAT-009,Rifugio Stivo,,SAT,SAT Rovereto,Italy,Trentino-Alto Adige,Baldo–Garda Prealps,1534,60,Mixed,On foot 1–3h,Active,No,45.917,10.946,estimate
+SAT-010,Rifugio Tosa–Pedrotti,,SAT,SAT Centrale,Italy,Trentino-Alto Adige,Brenta Dolomites,2485,120,Mixed,Cable car + walk,Active,Yes,46.167,10.892,estimate
+SAT-011,Rifugio Agostini,,SAT,SAT Centrale,Italy,Trentino-Alto Adige,Brenta Dolomites,2410,60,Mixed / Helicopter,On foot 1–3h,Active,Yes,46.128,10.86,estimate
+SAT-012,Rifugio Segantini,,SAT,SAT Centrale,Italy,Trentino-Alto Adige,Adamello–Presanella,2383,60,Mixed,On foot 1–3h,Active,Yes,46.205,10.66,estimate
+SAT-013,Rifugio Val di Fumo,,SAT,SAT Centrale,Italy,Trentino-Alto Adige,Adamello–Presanella,1918,60,Mixed,On foot 1–3h,Active,Yes,46.081,10.578,estimate
+SAT-014,Rifugio Vioz,,SAT,SAT Pejo,Italy,Trentino-Alto Adige,Ortles–Cevedale,3535,80,Helicopter,On foot >3h / Cable car base,Active,Yes,46.4,10.63,estimate
+SAT-015,Rifugio XII Apostoli,,SAT,SAT Centrale,Italy,Trentino-Alto Adige,Brenta Dolomites,2489,60,Mixed / Helicopter,On foot 1–3h,Active,Yes,46.143,10.818,estimate
+AVS-001,Rifugio Martello,Marteller Hütte,AVS,AVS Meran/Merano,Italy,South Tyrol / Bolzano,Ortles–Cevedale,2610,40,Mixed,On foot 1–3h,Active,Yes,46.471145,10.673095,workbook
+AVS-002,Rifugio Oberettes,Oberetteshütte,AVS,AVS Mals,Italy,South Tyrol / Bolzano,Ortles–Cevedale,,46,Mixed,On foot 1–3h,Active,Yes,46.77,10.7,estimate
+AVS-003,Rifugio Lago Rotondo,Radlseehütte,AVS,AVS,Italy,South Tyrol / Bolzano,Ortles–Cevedale,,40,Mixed,On foot 1–3h,Active,Yes,,,missing
+AVS-004,Rifugio Sesvenna,Sesvennahütte,AVS,AVS,Italy,South Tyrol / Bolzano,Vinschgau–Engadin border,2258,28,Mixed,On foot 1–3h,Active,Yes,46.734639,10.435528,workbook (latitude 6°→46° corrected)
+AVS-005,Rifugio Merano,Meraner Hütte,AVS,AVS Meran/Merano,Italy,South Tyrol / Bolzano,Texel group / Gruppo di Tessa,1999,,Cable car,Cable car + walk,Cable car from Merano; Texel group,AVS website,46.696,11.268,estimate
+CAI-001,Rifugio Gnutti,,CAI,CAI Brescia,Italy,Lombardy,Adamello–Presanella,2166,50,Mixed,On foot 1–3h,Active,Yes,46.128,10.458,estimate
+CAI-002,Rifugio Garibaldi,,CAI,CAI Brescia,Italy,Lombardy,Adamello–Presanella,2550,98,Mixed,On foot 1–3h / Helicopter,Active,Yes,46.15,10.488,estimate
+CAI-003,Rifugio Tonolini,,CAI,CAI Brescia,Italy,Lombardy,Adamello–Presanella,2449,70,Mixed,On foot 1–3h,Active,Yes,46.137,10.438,estimate
+CAI-004,Rifugio Sandro Occhi,,CAI,CAI Sondrio,Italy,Lombardy,Ortler–Cevedale,,50,Mixed,On foot 1–3h,Active,Yes,46.188,10.425,estimate
+CAI-005,Rifugio Branca-Martinelli,,CAI,CAI Milano,Italy,Lombardy,Ortler–Cevedale,2493,80,Mixed,On foot 1–3h,Active,Yes,46.414,10.591,estimate
+CAI-006,Rifugio Città di Milano,,CAI,CAI Milano,Italy,Lombardy,Ortler–Cevedale,2660,60,Mixed,On foot 1–3h / Cable car,Active,Yes,46.498,10.599,estimate
+CAI-007,Rifugio Lobbia Alta,,CAI,CAI Brescia,Italy,Lombardy,Adamello–Presanella,3020,60,Helicopter,On foot >3h / Helicopter,Active,Yes,46.165,10.567,estimate
+CAI-008,Rifugio Marco e Rosa,,CAI,CAI Sondrio,Italy,Lombardy,Bernina,3610,48,Helicopter,On foot >3h / Helicopter,Active,Yes,46.38,9.915,estimate
+CAI-009,Rifugio Bignami,,CAI,CAI Milano,Italy,Lombardy,Bernina,2041,70,Mixed,On foot 1–3h,Active,Yes,46.338,9.982,estimate
+CAI-010,Rifugio Marinelli-Bombardieri al Bernina,,CAI,CAI Valtellinese-Sondrio,Italy,Lombardy,Bernina,2813,100,Mixed / Helicopter,On foot 1–3h,Active,Yes,46.344639,9.905333,workbook
+CAI-011,Rifugio Carate Brianza,,CAI,CAI Carate Brianza,Italy,Lombardy,Bernina,2636,,Mixed,On foot 1–3h,,,46.330089,9.901711,workbook
+CAI-012,Rifugio Quinto Alpini,,CAI,CAI Milano,Italy,Lombardy,Ortles–Cevedale,2878,,,,,,46.471,10.564,estimate
+CAI-013,Rifugio Pizzini,,CAI,CAI Milano,Italy,Lombardy,Ortles–Cevedale,2706,,,,,,46.434,10.604,estimate
+CAI-014,Rifugio Del Grande-Camerini,,CAI,CAI Sovico,Italy,Lombardy,Adamello–Presanella,2508,,,,,,,,missing
+CAI-015,Rifugio Maria e Franco,,CAI,CAI Brescia,Italy,Lombardy,Adamello–Presanella,2557,,,,,,,,missing
+CAI-016,Rifugio Ponti,,CAI,CAI Milano,Italy,Lombardy,Adamello–Presanella,2559,,,,,,46.289,9.753,estimate
+CAI-017,Rifugio Berni,,CAI,CAI Carate Brianza,Italy,Lombardy,Stelvio,2541,,,,,,46.362,10.534,estimate
+CAI-018,Rifugio Allievi Bonacossa,,CAI,CAI Milano,Italy,Lombardy,Adamello–Presanella,2358,,,,,,46.292,9.648,estimate
+CAI-019,Rifugio Longoni,,CAI,CAI Seregno,Italy,Lombardy,Adamello–Presanella,2450,,,,,,46.341,9.804,estimate
+CAI-020,Rifugio Bozzi,,CAI,CAI Brescia,Italy,Lombardy,Stelvio,2478,,,,,,46.295,10.545,estimate
+CAI-021,Rifugio Gianetti,,CAI,CAI Milano,Italy,Lombardy,Adamello–Presanella,2534,,,,,,46.262,9.604,estimate
+CAI-022,Rifugio Chiavenna all'Alpe Angeloga,,CAI,CAI Chiavenna,Italy,Lombardy,Alpi del Platta,2204,,,On foot 1–3h,,,46.403039,9.401942,workbook
+CAI-023,Rifugio Bertacchi,,CAI,CAI,Italy,Lombardy,Alpi del Platta,2175,,,On foot 1–3h,,,46.469083,9.378711,workbook
+DAV-001,Wiesbadener Hütte,Wiesbadener Hütte,DAV,DAV Wiesbaden,Austria,Vorarlberg,Silvretta,2443,120,Mixed / Helicopter,On foot 1–3h,Active,Yes,46.88,10.103,estimate
+DAV-002,Heidelberger Hütte,Heidelberger Hütte,DAV,DAV Heidelberg,Austria,Tirol,Silvretta,2264,80,Mixed,On foot 1–3h,Active,Yes,46.913,10.267,estimate
+DAV-003,Jamtalhütte,Jamtalhütte,DAV,DAV Hannover,Austria,Tirol,Silvretta,2165,100,Mixed,On foot 1–3h,Active,Yes,46.883,10.164,estimate
+DAV-004,Saarbrücker Hütte,Saarbrücker Hütte,DAV,DAV Saarbrücken,Austria,Vorarlberg,Silvretta,2538,50,Helicopter,On foot >3h,Active,Yes,46.901,10.07,estimate
+DAV-005,Konstanzer Hütte,Konstanzer Hütte,DAV,DAV Konstanz,Austria,Vorarlberg,Arlberg–Verwall,1692,60,Mixed,On foot <1h,Active,Yes,47.086,10.089,estimate
+DAV-006,Mannheimer Hütte,Mannheimer Hütte,DAV,DAV Mannheim,Austria,Vorarlberg,Rätikon,2679,50,Helicopter,On foot >3h,Active,Yes,47.09,9.846,estimate
+DAV-007,Totalphütte,Totalphütte,DAV,DAV,Austria,Vorarlberg,Rätikon,2385,60,Mixed,On foot 1–3h,Active,Yes,47.05,9.764,estimate
+DAV-008,Douglashütte,Douglashütte,DAV,DAV,Austria,Vorarlberg,Silvretta–Montafon,1979,60,Mixed,On foot <1h,Active,Yes,47.059,9.784,estimate
+LBV-001,Pfälzerhütte,Pfälzerhütte,LAV,LAV (Liechtensteinischer Alpenverein),Liechtenstein,Liechtenstein,Rätikon,2108,80,Mixed,On foot 1–3h,Active,Yes,47.069,9.576,workbook
+LBV-002,Sücka,Sücka,LAV,LAV (Liechtensteinischer Alpenverein),Liechtenstein,Liechtenstein,Rätikon,1467,30,Mixed,On foot <1h,Active,Borderline,47.104,9.597,estimate
+SAC-001,Chamanna de Boval /Bovalhütte,Bovalhütte,SAC,SAC Piz Kesch / SAC Graubünden,Switzerland,Graubünden,Albula Alps,2632,50,Mixed / Helicopter,On foot 1–3h,Active,Yes,46.418,9.937,estimate
+SAC-002,Chamanna da Kesch / Keschhütte,Keschhütte,SAC,SAC Piz Kesch / SAC Graubünden,Switzerland,Graubünden,Albula Alps,2632,50,Mixed / Helicopter,On foot 1–3h,Active,Yes,46.624,9.862,estimate
+SAC-003,Chamanna da Coaz,Coazhütte,SAC,SAC Roseg / SAC St. Moritz,Switzerland,Graubünden,Bernina,2610,80,Mixed / Helicopter,On foot 1–3h,Active,Yes,46.403,9.887,estimate
+SAC-004,Chamanna d'Es-cha,Es-cha Hütte,SAC,SAC Piz Kesch,Switzerland,Graubünden,Engadin Alps,2594,60,Mixed,On foot 1–3h,Active,Yes,46.613,9.916,estimate
+SAC-005,Chamanna Tuoi,Tuoihütte,SAC,SAC Engadin,Switzerland,Graubünden,Engadin Alps,2250,50,Mixed,On foot 1–3h,Active,Yes,46.826,10.139,estimate
+SAC-006,Capanna Zapport / Zapporthütte,Zapporthütte,SAC,SAC Rheinwald,Switzerland,Graubünden,Adula–Hinterrhein,2222,60,Mixed,On foot 1–3h,Active,Yes,46.518,9.121,estimate
+SAC-007,Chamanna da Grialetsch,Grialetschhütte,SAC,SAC Albula,Switzerland,Graubünden,Albula Alps,2542,60,Mixed / Helicopter,On foot 1–3h,Active,Yes,46.73,9.968,estimate
+SAC-008,Linard-Hütte,Linard-Hütte,SAC,SAC Engadin,Switzerland,Graubünden,Engadin Alps,2328,50,Mixed,On foot 1–3h,Active,Yes,46.806,10.068,estimate
+SAC-009,Chamanna dal Fuorn,Ofenhütte,SAC,SAC Müstair,Switzerland,Graubünden,Engadin–Val Müstair,1794,50,Mixed,On foot <1h,Active,Yes,,,missing
+SAC-010,Heidelberger Hütte (SAC),Heidelberger Hütte,SAC,SAC,Switzerland,Graubünden,Silvretta,2264,80,Mixed,On foot 1–3h,Active,Yes,46.913,10.267,estimate
+SAC-011,Chamanna Segantini / Segantinihütte,Segantinihütte,SAC,SAC St. Moritz,Switzerland,Graubünden,Engadin Alps,2731,60,Cable car,Cable car + walk,Active,Yes,46.511,9.913,estimate
+SAC-012,Chamonna Lischana/ Lischanahütte,Lischanahütte,SAC,SAC Engadin,Switzerland,Graubünden,Engadin Alps,,49,,On foot >3h,Active,Yes,46.764,10.312,estimate
+APB-001,Rifugio Cima Fiammante,Lodnerhütte,APS,Provincia autonoma di Bolzano - Alto Adige,Italy,Bolzano,Alpi Venoste,2262,60,,On foot >3h,Active,Yes,46.72851,11.020573,workbook
+APB-002,Rifugio Petrarca all'Altissimo,Stettiner Hütte,APS,Provincia autonoma di Bolzano - Alto Adige,Italy,Bolzano,Alpi Venoste,2875,70,Mixed,On foot >3h,Active,Yes,46.756949,11.028824,workbook
+APB-003,Rifugio Plan,Zwickauer Hütte,APS,Provincia autonoma di Bolzano - Alto Adige,Italy,Bolzano,Alpi Venoste,2989,60,Helicopter,On foot >3h,Active,Yes,46.801796,11.054724,workbook
+APB-004,Rifugio Pio XI alla Palla Bianca,Weisskugelhütte,APS,Provincia autonoma di Bolzano - Alto Adige,Italy,Bolzano,Alpi Venoste,2557,48,Mixed,On foot 1–3h,Active,Yes,46.825722,10.705029,workbook
+APB-005,Rifugio Serristori,Düsseldorferhütte,APS,Provincia autonoma di Bolzano - Alto Adige,Italy,Bolzano,Ortles–Cevedale,2721,,,,Active,Yes,46.521,10.619,estimate
+APB-006,Rifugio Cima Libera,Müllerhütte,APS,Provincia autonoma di Bolzano - Alto Adige,Italy,Bolzano,,3145,,,,Active,Yes,46.992,11.158,estimate
+APB-007,Rifugio Forcella Vallaga,Flaggerschartenhütte-Marburger Hütte,APS,Provincia autonoma di Bolzano - Alto Adige,Italy,Bolzano,Alpi Venoste,2480,,,,Active,Yes,,,missing
+APB-008,Rifugio Biasi al Bicchiere,Becherhaus,APS,Provincia autonoma di Bolzano - Alto Adige,Italy,Bolzano,,3195,,,,Active,Yes,46.948,11.184,estimate
+APB-009,Rifugio Vedretta Pendente,Teplitzer Hütte,APS,Provincia autonoma di Bolzano - Alto Adige,Italy,Bolzano,,2586,,,,Active,Yes,46.965,11.216,estimate
+APB-010,Rifugio Vedretta Piana,Grohmannhütte,APS,Provincia autonoma di Bolzano - Alto Adige,Italy,Bolzano,,2254,,,,Active,Yes,46.958,11.219,estimate
+APB-011,Rifugio Nino Corsi,Zufallhütte,APS,Provincia autonoma di Bolzano - Alto Adige,Italy,Bolzano,,2265,,,,Active,Yes,46.495,10.649,estimate
+APB-012,Rifugio Payer,Payerhütte,APS,Provincia autonoma di Bolzano - Alto Adige,Italy,Bolzano,Ortles–Cevedale,3029,,,,Active,Yes,46.517,10.555,estimate
+APB-013,Rifugio Città di Milano,Schaubachhütte,APS,Provincia autonoma di Bolzano - Alto Adige,Italy,Bolzano,Ortles–Cevedale,2581,,,,Inactive,Yes,46.498,10.599,estimate
+APB-014,Rifugio Borletti,Berglhütte,APS,Provincia autonoma di Bolzano - Alto Adige,Italy,Bolzano,Ortles–Cevedale,2188,,,,Inactive,Yes,,,missing
+OeAV-001,Capanna Martino Bussi / Martin Busch Hütte,Martin Busch Hütte,OEAV,OeAV / Sektion Ötztal,Austria,Tirol,Alpi Venoste,2501,100,Mixed,On foot 1–3h,Active,Yes,46.864,10.904,workbook
+OeAV-002,Rifugio Hochjochhospiz,Hochjochhospiz,OEAV,OeAV / Sektion Austria Innsbruck,Austria,Tirol,Alpi Venoste,2412,60,Mixed / Helicopter,On foot 1–3h / Helicopter,Active,Yes,46.814,10.858,workbook
+OeAV-003,Rifugio Similaun / Similaunhütte,Similaunhütte,OEAV,OeAV / Sektion Hannover,Austria / Italy border,Tirol / South Tyrol,Alpi Venoste,3017,90,Helicopter,On foot >3h / Helicopter,Active,Yes,46.773,10.876,workbook
+OeAV-004,Brandenburger Haus,Brandenburger Haus,OEAV,OeAV / Sektion Brandenburg (verify: may be DAV),Austria / Italy border,Tirol / South Tyrol,Alpi Venoste,3272,30,Helicopter,On foot >3h / Helicopter,Active,Yes,46.77,10.82,workbook
+OeAV-005,Rifugio Franz Senn / Franz-Senn-Hütte,Franz-Senn-Hütte,OEAV,OeAV / Sektion Innsbruck,Austria,Tirol,Alpi dello Stubai,2147,120,Mixed,On foot 1–3h,Active,Yes,47.064,11.124,workbook
+OeAV-006,Rifugio Sulzenau / Sulzenauhütte,Sulzenauhütte,OEAV,OeAV / Sektion Hannover,Austria,Tirol,Alpi dello Stubai,2191,90,Mixed,On foot 1–3h,Active,Yes,47.062,11.076,workbook
+OeAV-007,Rifugio Brema / Bremer Hütte,Bremer Hütte,OEAV,OeAV / Sektion Innsbruck,Austria,Tirol,Alpi dello Stubai,2413,80,Mixed,On foot 1–3h,Active,Yes,47.022,11.258,workbook
+OeAV-008,Rifugio Innsbruck / Innsbrucker Hütte,Innsbrucker Hütte,OEAV,OeAV / Sektion Innsbruck,Austria,Tirol,Alpi dello Stubai,2369,80,Mixed,On foot 1–3h,Active,Yes,47.076,11.048,workbook
+OeAV-009,Rifugio Cima Libera / Cima Libera Hütte,Cima Libera Hütte,OEAV,OeAV (verify section),Austria / Italy border,Tirol / South Tyrol,Alpi dello Stubai,3145,40,Helicopter,On foot >3h / Helicopter,Active,Borderline,46.992,11.158,estimate

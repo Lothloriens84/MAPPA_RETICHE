@@ -6,3 +6,4 @@ __pycache__/
 parks*.geojson
 wdpa/
 WDPA*/
+*.xlsx

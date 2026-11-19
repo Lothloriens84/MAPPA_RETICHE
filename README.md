@@ -1,8 +1,9 @@
 # MAPPA_RETICHE
 
-Source code for two maps of the PhD thesis (*Food Heritage: Cultures and Identities*, University of Coimbra):
+Source code for three maps of the PhD thesis (*Food Heritage: Cultures and Identities*, University of Coimbra):
 
 - **Figure 1: The Rhaetian Alps: regional boundaries and hut-governing entities** (`rhaetian_map.py`)
+- **The Rhaetian Alps: mountain huts of the hut-governing entities** (`huts_map.py`, see `README_huts.md`)
 - **The Rhaetian Alps: heritage claims on mountain food beyond the hut-governing entities** (`heritage_map.py`)
 
 ![Figure 1](output/F1_Rhaetian_alps_map.png)
@@ -13,19 +14,21 @@ hut-governing entities (seven alpine clubs and one public authority) own or oper
 Each club's territory is its whole country (CAI: Italy; DAV: Germany; SAC: Switzerland; ÖAV:
 Austria; LAV: Liechtenstein), with the units that have their own arrangement drawn on top and
 striped where entities share them (Vorarlberg and Tyrol: DAV and ÖAV; South Tyrol: CAI, AVS and
-the Province; Trentino: SAT). An arrow runs from each entity to the city of its head office; for
-the three with head offices outside the study area (CAI, SAC, DAV), dotted arrows continue from
-that city to their territories inside it. A locator in the top-left corner shows where the study
-area lies in Europe.
+the Province; Trentino: SAT). Each entity's logo and acronym sit next to its head office; for the
+three with head offices outside the study area (CAI, SAC, DAV), dotted arrows run from that city to
+their territories inside it. Dash-dot lines mark the limits between the three SOIUSA sections, and a
+locator in the top-left corner shows where the study area lies in Europe.
 
 ## Contents
 
 | Path | What it is |
 |---|---|
 | `rhaetian_map.py` | Figure 1. All settings (outline, territories, labels, colours) are in its CONFIG section. |
+| `huts_map.py` | Hut map: one marker per hut from `data/huts.csv` on the Figure 1 base, with a count table. See `README_huts.md`. |
+| `data/huts.csv` | Hut table (no personal contacts), built by `tools/huts_from_workbook.py`. |
 | `heritage_map.py` | Companion map: protected areas, territorial quality labels, valley initiatives and UNESCO intangible heritage on the Figure 1 base. Imports the base settings from `rhaetian_map.py`. |
 | `ne_data/` | Natural Earth 1:10m boundaries, trimmed to the Alpine area (5.5–14.2°E, 44.3–49.3°N), plus a simplified Europe layer for the locator. |
-| `logos/` | Entity logos (PNG, trimmed), named by entity key: LAV, SAC, CAI, DAV, OEAV, AVS, APS, SAT. |
+| `logos/` | Entity logos (PNG, trimmed), named by entity key: LAV, SAC, CAI, DAV, OEAV, AVS, APS, SAT; `SAC_emblem` and `APS_emblem` are the emblem-only versions used on Figure 1. |
 | `output/` | The rendered figure (PDF, PNG at 300 dpi, SVG). |
 | `requirements.txt` | Python dependencies (matplotlib only). |
 
@@ -35,6 +38,13 @@ area lies in Europe.
 pip install -r requirements.txt
 cd output
 python ../rhaetian_map.py ../ne_data --out F1_Rhaetian_alps_map
+```
+
+Hut map:
+
+```bash
+cd output
+python ../huts_map.py ../ne_data
 ```
 
 Heritage map:
@@ -59,7 +69,7 @@ Parks not in the file keep their schematic outline, and the source line on the m
 
 ![Heritage map](output/Rhaetian_alps_heritage_map.png)
 
-Logos are read from `logos/` next to the script and drawn above each entity's box.
+Logos are read from `logos/` next to the script and drawn in each entity's badge.
 Use `--logos other/folder` to point elsewhere, or `--logos none` for a version without logos.
 
 ## Method notes
@@ -67,8 +77,14 @@ Use `--logos other/folder` to point elsewhere, or `--logos none` for a version w
 - **Study area.** The outline is digitised manually as about 65 points along the limits of the
   SOIUSA sections (Marazzi 2005), placed at towns, passes and river confluences. It is
   approximate (a few km) and not an official SOIUSA boundary dataset.
-- **Projection.** Equirectangular, with longitude scaled by the cosine of the map's middle
-  latitude (≈46.6°N). The scale bar is therefore approximate.
+- **SOIUSA section limits.** Western | Eastern: Inn (Landeck – Pfunds) – Reschen Pass – upper Val Venosta;
+  Western | Southern: Aprica – Tirano – Valtellina – Bormio – Stelvio Pass – Trafoi; Eastern | Southern:
+  Val Venosta – Merano – Bolzano. Approximate, like the outline.
+- **Projection.** Figure 1 and the hut map: ETRS89-LAEA Europe (EPSG:3035), computed in the script with
+  the ellipsoidal formulas (Snyder 1987), so the scale bar is exact. The heritage map still uses the earlier
+  equirectangular base (longitude scaled by the cosine of ≈46.6°N); its scale bar is approximate.
+- **Colours.** Entity colours follow the Okabe–Ito palette, chosen to stay distinguishable with
+  colour-vision deficiencies; fonts are Times New Roman where installed, else Liberation Serif.
 - **Protected areas (heritage map).** Nine outlines digitised by hand around towns, valleys and passes,
   accurate to a few km; schematic, not official boundaries, until replaced with `--parks`.
 - **Shading (Figure 1).** Each operating territory takes the colour of the entity running huts there
