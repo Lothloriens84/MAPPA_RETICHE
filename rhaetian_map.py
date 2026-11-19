@@ -454,7 +454,7 @@ def set_fonts():
 # ════════════════════════════════════════════════════════════════════════════
 
 def draw_base(ax, ne_dir, frame, territory_labels=True, section_labels="code", veil=VEIL,
-              country_labels=None, li_label=None):
+              country_labels=None, li_label=None, relief=True):
     """Territories, borders, lakes, study area, section limits, veil and labels.
     frame = (lon0, lon1, lat0, lat1). Returns the study-area patch."""
     set_view(*frame)
@@ -497,7 +497,7 @@ def draw_base(ax, ne_dir, frame, territory_labels=True, section_labels="code", v
 
     # relief (only in the LAEA maps; the hillshade grid is in EPSG:3035)
     hs_png = os.path.join(ne_dir, "hillshade_laea.png")
-    if _PROJ == "laea" and os.path.exists(hs_png):
+    if relief and _PROJ == "laea" and os.path.exists(hs_png):
         meta = json.load(open(os.path.splitext(hs_png)[0] + ".json"))
         shade = plt.imread(hs_png).astype(float)
         if shade.max() > 1:
@@ -715,7 +715,7 @@ def main():
     frame = (F1_LON_MIN, F1_LON_MAX, F1_LAT_MIN, F1_LAT_MAX)
     fig = plt.figure(figsize=(11.5, 11.0), facecolor=C["paper"])
     ax = fig.add_axes([0.025, 0.175, 0.95, 0.815])
-    draw_base(ax, args.ne_dir, frame, section_labels="code",
+    draw_base(ax, args.ne_dir, frame, section_labels="code", relief=False,
               country_labels=F1_COUNTRY_LABELS, li_label=F1_LI_LABEL)
     for txt, lon, lat in F1_REGION_LABELS:
         ax.text(*proj(lon, lat), txt, ha="center", va="center", size=9, color=C["muted"],
