@@ -51,7 +51,7 @@ LAT_MIN, LAT_MAX = 45.55, 47.62
 
 # Figure 1 frame: wider than the base extent so that every head office is on the map
 F1_LON_MIN, F1_LON_MAX = 7.10, 12.35
-F1_LAT_MIN, F1_LAT_MAX = 45.28, 48.32
+F1_LAT_MIN, F1_LAT_MAX = 45.28, 48.50
 
 # Fonts: Times New Roman if installed, else a metric-compatible serif
 FONTS = ["Times New Roman", "Liberation Serif", "TeX Gyre Termes", "DejaVu Serif"]
@@ -183,7 +183,8 @@ CITIES = {
 #   colour  : fill colour (Okabe–Ito palette, distinguishable with colour-vision deficiencies)
 #   ink     : darker shade for text and lines
 #   hq      : head-office city (key in CITIES)
-#   box     : where the logo badge sits on Figure 1 (lon, lat); a leader joins it to the city
+#   box     : where the logo badge sits on Figure 1: "above" = directly on top of the city marker,
+#             or (lon, lat) with a leader line to the city
 #   targets : operating territories (used by heritage_map.py)
 #   reach   : for entities with a head office outside the study area, dotted arrows from
 #             that city to their territories inside it: (lon, lat, curvature)
@@ -191,13 +192,13 @@ ENTITIES = {
     "LAV":  dict(kind="club", label="LAV", name="Liechtensteiner Alpenverein", colour="#56B4E9", ink="#1F78B4",
                  hq="Schaan", box=(8.95, 47.60), targets=[("LI", 9.56, 47.12)]),
     "SAC":  dict(kind="club", label="SAC", name="Schweizer Alpen-Club", colour="#D55E00", ink="#B34E00",
-                 hq="Bern", box=(7.62, 46.40), targets=[("GR", 9.80, 46.58)],
+                 hq="Bern", box="above", targets=[("GR", 9.80, 46.58)],
                  reach=[(9.72, 46.66, -0.2)]),
     "CAI":  dict(kind="club", label="CAI", name="Club Alpino Italiano", colour="#009E73", ink="#007A59",
-                 hq="Milan", box=(8.30, 45.62), targets=[("SO", 10.02, 46.36), ("BS", 10.45, 46.08)],
+                 hq="Milan", box="above", targets=[("SO", 10.02, 46.36), ("BS", 10.45, 46.08)],
                  reach=[(10.02, 46.30, 0.15), (10.42, 46.06, 0.15), (11.02, 46.62, 0.22)]),
     "DAV":  dict(kind="club", label="DAV", name="Deutscher Alpenverein", colour="#0072B2", ink="#0072B2",
-                 hq="Munich", box=(10.45, 48.10), targets=[("VBG", 9.90, 47.06), ("TIR", 10.82, 47.10)],
+                 hq="Munich", box="above", targets=[("VBG", 9.90, 47.06), ("TIR", 10.82, 47.10)],
                  reach=[(9.92, 47.05, 0.18), (10.85, 47.08, 0.15)]),
     "OEAV": dict(kind="club", label="ÖAV", name="Österreichischer Alpenverein", colour="#E69F00", ink="#B07800",
                  hq="Innsbruck", box=(11.95, 47.72), targets=[("VBG", 10.12, 47.02), ("TIR", 11.25, 47.12)]),
@@ -659,11 +660,13 @@ def main():
     for key, a in ENTITIES.items():
         clon, clat = CITIES[a["hq"]][:2]
         cx, cy = proj(clon, clat)
-        bx, by = proj(*a["box"])
-        ls = (0, (4, 2)) if a["kind"] == "authority" else "-"
-        ax.annotate("", xy=(cx, cy), xytext=(bx, by),
-                    arrowprops=dict(arrowstyle="-", color=a["ink"], lw=1.3, ls=ls, shrinkA=0, shrinkB=5),
-                    zorder=7.5)
+        on_city = a["box"] == "above"
+        if not on_city:
+            bx, by = proj(*a["box"])
+            ls = (0, (4, 2)) if a["kind"] == "authority" else "-"
+            ax.annotate("", xy=(cx, cy), xytext=(bx, by),
+                        arrowprops=dict(arrowstyle="-", color=a["ink"], lw=1.3, ls=ls, shrinkA=0, shrinkB=5),
+                        zorder=7.5)
         for rlon, rlat, rrad in a.get("reach", []):
             ax.annotate("", xy=proj(rlon, rlat), xytext=(cx, cy),
                         arrowprops=dict(arrowstyle="-|>,head_length=0.5,head_width=0.24",
@@ -673,8 +676,13 @@ def main():
             ax.plot(*proj(rlon, rlat), "o", ms=3.6, mfc="white", mec=a["ink"], mew=1.3, zorder=8)
         logo = find_logo(key, args.logos)
         any_logo |= bool(logo)
-        ax.add_artist(AnnotationBbox(make_badge(a, logo), (bx, by), xycoords="data", frameon=True,
-                                     zorder=9, pad=0.3, bboxprops=badge_box(a)))
+        if on_city:      # badge sits just above the city marker
+            ax.add_artist(AnnotationBbox(make_badge(a, logo), (cx, cy), xycoords="data", frameon=True,
+                                         xybox=(0, 9), boxcoords="offset points", box_alignment=(0.5, 0),
+                                         zorder=9, pad=0.3, bboxprops=badge_box(a)))
+        else:
+            ax.add_artist(AnnotationBbox(make_badge(a, logo), (bx, by), xycoords="data", frameon=True,
+                                         zorder=9, pad=0.3, bboxprops=badge_box(a)))
 
     draw_scale_north(ax, frame)
     draw_locator(fig, ax, args.ne_dir, frame)
