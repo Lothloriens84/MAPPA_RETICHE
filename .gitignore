@@ -11,3 +11,6 @@ WDPA*/
 # Copernicus DEM tiles: keep local (derived hillshade is in ne_data/)
 copernicus_dem*/
 *_DEM.tif
+
+# SOIUSA polygons (M. Accorsi / ARPA Piemonte): download locally, see README
+data/soiusa*.geojson

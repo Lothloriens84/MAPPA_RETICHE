@@ -25,7 +25,7 @@ locator in the top-left corner shows where the study area lies in Europe.
 | Path | What it is |
 |---|---|
 | `rhaetian_map.py` | Figure 1. All settings (outline, territories, labels, colours) are in its CONFIG section. |
-| `alps_map.py` | SOIUSA map (A3 landscape, with relief): sections and their 15 subsections over the entity territories, and a table of the territories each subsection lies in (`SUBSECTIONS` in the script). |
+| `alps_map.py` | SOIUSA map (A3 landscape, with relief): the SOIUSA sections, 15 subsections and mountain groups of the Rhaetian Alps over the entity territories, with a table of each subsection's area by territory (computed by overlay). Needs `data/soiusa_retiche.geojson` (see below). |
 | `huts_map.py` | Hut map: one marker per hut from `data/huts.csv` on the Figure 1 base, with a count table. See `README_huts.md`. |
 | `data/huts.csv` | Hut table (no personal contacts), built by `tools/huts_from_workbook.py`. |
 | `heritage_map.py` | Companion map: protected areas, territorial quality labels, valley initiatives and UNESCO intangible heritage on the Figure 1 base. Imports the base settings from `rhaetian_map.py`. |
@@ -42,9 +42,13 @@ cd output
 python ../rhaetian_map.py ../ne_data --out F1_Rhaetian_alps_map
 ```
 
-SOIUSA map:
+SOIUSA map: first download the SOIUSA polygons of the Rhaetian Alps (digitised by Massimo Accorsi, published by
+ARPA Piemonte); they are not redistributed here:
 
 ```bash
+curl -fsSL -G "https://webgis.arpa.piemonte.it/ags/rest/services/topografia_dati_di_base/SOIUSA/FeatureServer/1/query" \
+  --data-urlencode "where=SZ LIKE '%Retiche%'" --data-urlencode "outFields=*" --data-urlencode "outSR=4326" \
+  --data-urlencode "geometryPrecision=5" --data-urlencode "f=geojson" -o data/soiusa_retiche.geojson
 cd output
 python ../alps_map.py ../ne_data
 ```

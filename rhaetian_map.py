@@ -435,18 +435,19 @@ def draw_stripes(ax, path, cols, clip_patch, width=None):
     return im
 
 
-def outside_path(ax):
-    """The axes area with the study area cut out (for the veil)."""
-    ring = [proj(x, y) for x, y in STUDY_AREA]
-    signed = sum(ring[i][0] * ring[i + 1][1] - ring[i + 1][0] * ring[i][1] for i in range(len(ring) - 1))
-    if signed > 0:              # make the hole run opposite to the (counter-clockwise) rectangle
-        ring = ring[::-1]
+def outside_path(ax, polys=None):
+    """The axes area with the study area (or the given lon/lat rings) cut out, for the veil."""
     (x0, x1), (y0, y1) = ax.get_xlim(), ax.get_ylim()
     dx, dy = (x1 - x0), (y1 - y0)
-    big = [(x0 - dx, y0 - dy), (x1 + dx, y0 - dy), (x1 + dx, y1 + dy), (x0 - dx, y1 + dy), (x0 - dx, y0 - dy)]
-    verts = big + ring
-    codes = ([Path.MOVETO] + [Path.LINETO] * 3 + [Path.CLOSEPOLY] +
-             [Path.MOVETO] + [Path.LINETO] * (len(ring) - 2) + [Path.CLOSEPOLY])
+    verts = [(x0 - dx, y0 - dy), (x1 + dx, y0 - dy), (x1 + dx, y1 + dy), (x0 - dx, y1 + dy), (x0 - dx, y0 - dy)]
+    codes = [Path.MOVETO] + [Path.LINETO] * 3 + [Path.CLOSEPOLY]
+    for r in (polys or [STUDY_AREA]):
+        ring = [proj(x, y) for x, y in r]
+        signed = sum(ring[i][0] * ring[i + 1][1] - ring[i + 1][0] * ring[i][1] for i in range(len(ring) - 1))
+        if signed > 0:          # holes run opposite to the (counter-clockwise) rectangle
+            ring = ring[::-1]
+        verts += ring
+        codes += [Path.MOVETO] + [Path.LINETO] * (len(ring) - 2) + [Path.CLOSEPOLY]
     return Path(verts, codes)
 
 
@@ -470,7 +471,7 @@ def set_fonts():
 # ════════════════════════════════════════════════════════════════════════════
 
 def draw_base(ax, ne_dir, frame, territory_labels=True, section_labels="code", veil=VEIL,
-              country_labels=None, li_label=None, relief=True):
+              country_labels=None, li_label=None, relief=True, study_polys=None, section_lines=True):
     """Territories, borders, lakes, study area, section limits, veil and labels.
     frame = (lon0, lon1, lat0, lat1). Returns the study-area patch."""
     set_view(*frame)
@@ -486,8 +487,12 @@ def draw_base(ax, ne_dir, frame, territory_labels=True, section_labels="code", v
     for s in ax.spines.values():
         s.set_edgecolor(C["border_country"]); s.set_linewidth(0.8)
 
-    # study area (also the clip path used for stripes)
-    study = PathPatch(ring_path([STUDY_AREA]), fc="none", ec=C["study"], lw=1.6, zorder=5)
+    # study area: hand-traced outline, or the outer boundary of given polygons (e.g. SOIUSA groups)
+    if study_polys:
+        study = PathPatch(dissolved_edges([{"type": "Polygon", "coordinates": [r]} for r in study_polys]),
+                          fc="none", ec=C["study"], lw=1.8, zorder=5.2)
+    else:
+        study = PathPatch(ring_path([STUDY_AREA]), fc="none", ec=C["study"], lw=1.6, zorder=5)
     ax.add_patch(study)
 
     idx = {}
@@ -537,7 +542,7 @@ def draw_base(ax, ne_dir, frame, territory_labels=True, section_labels="code", v
                 ax.add_patch(PathPatch(p, fc="none", ec="white", lw=0.55, zorder=2.25))
 
     if veil:
-        ax.add_patch(PathPatch(outside_path(ax), fc="white", ec="none", alpha=veil, zorder=2.4))
+        ax.add_patch(PathPatch(outside_path(ax, study_polys), fc="white", ec="none", alpha=veil, zorder=2.4))
 
     ctry, reg = REGION_OUTLINE
     reg_geoms = [f["geometry"] for f in adm1
@@ -594,7 +599,7 @@ def draw_base(ax, ne_dir, frame, territory_labels=True, section_labels="code", v
                         path_effects=[pe.withStroke(linewidth=2.2, foreground="white")])
 
     # SOIUSA section limits and labels
-    for pts in SECTION_LINES:
+    for pts in (SECTION_LINES if section_lines else []):
         ax.add_patch(PathPatch(line_path(pts), fc="none", ec=C["section"], lw=0.9,
                                ls=(0, (6, 2, 1.2, 2)), zorder=4.9))
     if section_labels:
