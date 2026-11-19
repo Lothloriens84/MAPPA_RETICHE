@@ -51,7 +51,7 @@ LAT_MIN, LAT_MAX = 45.55, 47.62
 
 # Figure 1 frame: wider than the base extent so that every head office is on the map
 F1_LON_MIN, F1_LON_MAX = 7.10, 12.35
-F1_LAT_MIN, F1_LAT_MAX = 45.28, 48.50
+F1_LAT_MIN, F1_LAT_MAX = 45.28, 48.32
 
 # Fonts: Times New Roman if installed, else a metric-compatible serif
 FONTS = ["Times New Roman", "Liberation Serif", "TeX Gyre Termes", "DejaVu Serif"]
@@ -173,7 +173,7 @@ CITIES = {
     "Schaan":    (9.508, 47.166, (-6, 0), "right"),
     "Bern":      (7.447, 46.948, (0, -9), "center"),
     "Milan":     (9.190, 45.464, (0, -9), "center"),
-    "Munich":    (11.576, 48.137, (7, 0), "left"),
+    "Munich":    (11.576, 48.137, (-7, 0), "right"),
     "Innsbruck": (11.393, 47.269, (0, 8), "center"),
     "Bolzano":   (11.354, 46.498, (-7, 0), "right"),
     "Trento":    (11.121, 46.067, (-7, 0), "right"),
@@ -184,7 +184,7 @@ CITIES = {
 #             similar hues (LAV/DAV, SAT/ÖAV) stay apart)
 #   ink     : darker shade for text and lines
 #   hq      : head-office city (key in CITIES)
-#   box     : where the logo badge sits on Figure 1: "above" = directly on top of the city marker,
+#   box     : where the logo badge sits on Figure 1: "above" / "right" = directly on top of / right of the city marker,
 #             or (lon, lat) with a leader line to the city
 #   targets : operating territories (used by heritage_map.py)
 #   reach   : for entities with a head office outside the study area, dotted arrows from
@@ -199,7 +199,7 @@ ENTITIES = {
                  hq="Milan", box="above", targets=[("SO", 10.02, 46.36), ("BS", 10.45, 46.08)],
                  reach=[(10.02, 46.30, 0.15), (10.42, 46.06, 0.15), (11.02, 46.62, 0.22)]),
     "DAV":  dict(kind="club", label="DAV", name="Deutscher Alpenverein", colour="#0072B2", ink="#0072B2",
-                 hq="Munich", box="above", targets=[("VBG", 9.90, 47.06), ("TIR", 10.82, 47.10)],
+                 hq="Munich", box="right", targets=[("VBG", 9.90, 47.06), ("TIR", 10.82, 47.10)],
                  reach=[(9.92, 47.05, 0.18), (10.85, 47.08, 0.15)]),
     "OEAV": dict(kind="club", label="ÖAV", name="Österreichischer Alpenverein", colour="#E69F00", ink="#B07800",
                  hq="Innsbruck", box=(11.95, 47.72), targets=[("VBG", 10.12, 47.02), ("TIR", 11.25, 47.12)]),
@@ -661,7 +661,7 @@ def main():
     for key, a in ENTITIES.items():
         clon, clat = CITIES[a["hq"]][:2]
         cx, cy = proj(clon, clat)
-        on_city = a["box"] == "above"
+        on_city = a["box"] in ("above", "right")
         if not on_city:
             bx, by = proj(*a["box"])
             ls = (0, (4, 2)) if a["kind"] == "authority" else "-"
@@ -677,9 +677,10 @@ def main():
             ax.plot(*proj(rlon, rlat), "o", ms=3.6, mfc="white", mec=a["ink"], mew=1.3, zorder=8)
         logo = find_logo(key, args.logos)
         any_logo |= bool(logo)
-        if on_city:      # badge sits just above the city marker
+        if on_city:      # badge sits just above / right of the city marker
+            off, align = ((0, 9), (0.5, 0)) if a["box"] == "above" else ((9, 0), (0, 0.5))
             ax.add_artist(AnnotationBbox(make_badge(a, logo), (cx, cy), xycoords="data", frameon=True,
-                                         xybox=(0, 9), boxcoords="offset points", box_alignment=(0.5, 0),
+                                         xybox=off, boxcoords="offset points", box_alignment=align,
                                          zorder=9, pad=0.3, bboxprops=badge_box(a)))
         else:
             ax.add_artist(AnnotationBbox(make_badge(a, logo), (bx, by), xycoords="data", frameon=True,
