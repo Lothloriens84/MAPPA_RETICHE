@@ -101,8 +101,8 @@ Use `--logos other/folder` to point elsewhere, or `--logos none` for a version w
   `copernicus-dem-90m` bucket and rerun the tool. Copernicus DEM © DLR e.V. 2010–2014 and © Airbus Defence and
   Space GmbH 2014–2018, provided under COPERNICUS by the European Union and ESA.
 - **Rivers.** Natural Earth 1:10m rivers and lake centerlines plus the Europe supplement, trimmed to the
-  Alpine area (`ne_data/ne_10m_rivers_alps.geojson`). Smaller rivers such as the Isarco and the Sarca are not
-  in the dataset at this scale.
+  Alpine area (`ne_data/ne_10m_rivers_alps.geojson`). The Sarca is not in the dataset at this scale and is digitised by
+  hand along its valley (Val Genova – Pinzolo – Tione – Ponte Arche – Sarche – Arco – Torbole; `HAND_RIVERS`, approximate).
 
 ## Sources and licences
 

@@ -162,6 +162,12 @@ DEM_CREDIT = (" Relief: Copernicus DEM GLO-90 (© DLR e.V. 2010–2014 and © Ai
 
 # Rivers (Natural Earth 1:10m rivers + Europe supplement, trimmed: ne_data/ne_10m_rivers_alps.geojson)
 RIVER_COLOUR = "#6FA3BE"
+# Rivers missing from Natural Earth at 1:10m, digitised by hand (approximate, ±1-2 km)
+HAND_RIVERS = {
+    "Sarca": [(10.63, 46.175), (10.70, 46.170), (10.758, 46.168), (10.765, 46.150), (10.752, 46.118),
+              (10.735, 46.075), (10.725, 46.040), (10.765, 46.038), (10.810, 46.030), (10.868, 46.040),
+              (10.950, 46.040), (10.942, 45.995), (10.912, 45.960), (10.885, 45.920), (10.876, 45.876)],
+}
 RIVER_LABELS = [   # (names in the data, label, lon, lat): label sits on the nearest river vertex, along the river
     (("Rhein", "Rhine", "Rhin"), "Rhine", 9.62, 47.38),
     (("Inn",), "Inn", 10.98, 47.29),
@@ -170,6 +176,7 @@ RIVER_LABELS = [   # (names in the data, label, lon, lat): label sits on the nea
     (("Oglio",), "Oglio", 10.33, 46.02),
     (("Ill",), "Ill", 9.74, 47.18),
     (("Ticino",), "Ticino", 8.80, 45.85),
+    (("Sarca",), "Sarca", 10.80, 46.035),
 ]
 
 # Operating territories: key -> (admin level, country, Natural Earth name, English label, label lon, lat)
@@ -217,7 +224,7 @@ ENTITIES = {
                  reach=[(9.72, 46.66, -0.2)]),
     "CAI":  dict(kind="club", label="CAI", name="Club Alpino Italiano", colour="#009E73", ink="#007A59",
                  hq="Milan", box="edge", targets=[("SO", 10.02, 46.36), ("BS", 10.45, 46.08)],
-                 reach=[(10.02, 46.30, 0.15), (10.42, 46.06, 0.15), (11.02, 46.62, 0.22)]),
+                 reach=[(10.42, 46.06, 0.15), (11.02, 46.62, 0.22)]),
     "DAV":  dict(kind="club", label="DAV", name="Deutscher Alpenverein", colour="#0072B2", ink="#0072B2",
                  hq="Munich", box="edge", targets=[("VBG", 9.90, 47.06), ("TIR", 10.82, 47.10)],
                  reach=[(9.92, 47.05, 0.18), (10.85, 47.08, 0.15)]),
@@ -544,7 +551,8 @@ def draw_base(ax, ne_dir, frame, territory_labels=True, section_labels="code", v
     # rivers
     fn = os.path.join(ne_dir, "ne_10m_rivers_alps.geojson")
     if os.path.exists(fn):
-        rivers = load(fn)
+        rivers = load(fn) + [{"properties": {"name": n, "scalerank": 10},
+                              "geometry": {"coordinates": [pts]}} for n, pts in HAND_RIVERS.items()]
         for f in rivers:
             r = f["properties"].get("scalerank") or 10
             lw = 1.4 if r <= 6 else 1.1 if r <= 8 else 0.85
@@ -684,6 +692,28 @@ def make_badge(a, logo=None):
     return VPacker(children=kids, align="center", pad=0, sep=2)
 
 
+class HandlerStripes(HandlerPatch):
+    """Legend glyph with diagonal stripes in the given colours (as drawn on the map)."""
+    def __init__(self, cols):
+        super().__init__()
+        self.cols = cols
+
+    def create_artists(self, legend, orig, xd, yd, w, h, fs, trans):
+        box = Rectangle((xd, yd), w, h, fc="none", ec="none", transform=trans)
+        out = [box]
+        sw = h * 0.7                                   # stripe width in legend units
+        k = 0
+        x = xd - h
+        while x < xd + w + h:
+            poly = plt.Polygon([(x, yd), (x + sw, yd), (x + sw + h, yd + h), (x + h, yd + h)], closed=True,
+                               fc=self.cols[k % len(self.cols)], ec="none", transform=trans)
+            poly.set_clip_path(box)
+            out.append(poly)
+            x += sw; k += 1
+        out.append(Rectangle((xd, yd), w, h, fc="none", ec="#BBBBBB", lw=0.5, transform=trans))
+        return out
+
+
 class HandlerBadge(HandlerPatch):
     """Legend glyph that looks like a badge (rounded/solid or square/dashed)."""
     def __init__(self, rounded, dashed):
@@ -713,8 +743,9 @@ def main():
     use_laea()
     set_fonts()
     frame = (F1_LON_MIN, F1_LON_MAX, F1_LAT_MIN, F1_LAT_MAX)
-    fig = plt.figure(figsize=(11.5, 11.0), facecolor=C["paper"])
-    ax = fig.add_axes([0.025, 0.175, 0.95, 0.815])
+    fig = plt.figure(figsize=(16.54, 11.69), facecolor=C["paper"])          # A3 landscape (foldout)
+    ax = fig.add_axes([0.012, 0.085, 0.775, 0.905])
+    ax.set_anchor("W")
     draw_base(ax, args.ne_dir, frame, section_labels="code", relief=False,
               country_labels=F1_COUNTRY_LABELS, li_label=F1_LI_LABEL)
     for txt, lon, lat in F1_REGION_LABELS:
@@ -759,7 +790,7 @@ def main():
             txt_ang = ang - 180 if ang > 90 else ang + 180 if ang < -90 else ang
             px_, py_ = -uy, ux                                        # perpendicular, for the label offset
             mx, my = (ex + bx) / 2 + px_ * 0 , (ey + by) / 2
-            ax.annotate(f"{a['hq']} {dist} km", (ex - ux * 12 * KM, ey - uy * 12 * KM), xytext=(px_ * 11, py_ * 11),
+            ax.annotate(a["hq"], (ex - ux * 12 * KM, ey - uy * 12 * KM), xytext=(px_ * 11, py_ * 11),
                         textcoords="offset points", rotation=txt_ang, rotation_mode="anchor",
                         ha="center", va="center", size=9.5, weight="bold", color=a["ink"], zorder=8.9,
                         path_effects=[pe.withStroke(linewidth=2.8, foreground="white")])
@@ -794,18 +825,22 @@ def main():
     draw_scale_north(ax, frame)
     draw_locator(fig, ax, args.ne_dir, frame, width=0.17)
 
-    # legend (map symbols) and key (entities)
+    # legend (map symbols) and key (entities), in a column right of the map
+    ax.apply_aspect()
+    lx = ax.get_position().x1 + 0.012
     n_club = sum(a["kind"] == "club" for a in ENTITIES.values())
     n_auth = sum(a["kind"] == "authority" for a in ENTITIES.values())
     club_h, auth_h = Patch(), Patch(label="_")
+    shared = [(TERRITORIES[k][3], ents) for k, ents in (("TIR", ["DAV", "OEAV"]), ("BZ", ["CAI", "AVS", "APS"]))]
+    stripe_h = [Patch(label=f"_s{i}") for i in range(len(shared))]
     handles = [
         Line2D([], [], color=C["study"], lw=1.6),
         Line2D([], [], color=C["section"], lw=0.9, ls=(0, (6, 2, 1.2, 2))),
-        Patch(fc=tint(ENTITIES["DAV"]["colour"]), ec="white", hatch="////",
-              hatchcolor=tint(ENTITIES["OEAV"]["colour"], 0.8), lw=0),
-        Patch(fc=pale_of(tint(ENTITIES["CAI"]["colour"])), ec="#DDDDDD", lw=0.5),
+        *stripe_h,
+        Patch(fc=pale_of(tint(ENTITIES["CAI"]["colour"])), ec="#BBBBBB", lw=0.5),
         Line2D([], [], color=C["border_country"], lw=1.1, ls=(0, (5, 1.6))),
         Line2D([], [], color=C["border_region"], lw=0.9),
+        Line2D([], [], color=RIVER_COLOUR, lw=1.2),
         Line2D([], [], ls="none", marker="o", ms=7, mfc="white", mec=C["text"], mew=1.7),
         Line2D([], [], ls="none", marker=r"$\rightarrow$", ms=14, color=C["text"]),
         Line2D([], [], color=C["text"], lw=1.2, ls=(0, (1.5, 1.5)), marker="o", ms=3.6,
@@ -814,30 +849,36 @@ def main():
     ]
     labels = [
         "Rhaetian Alps (study area)",
-        "Limit between SOIUSA sections",
-        "Territory shared by several entities (stripes)",
+        "Limit between SOIUSA sections\n(II/A-15 Western, II/A-16 Eastern,\nII/C-28 Southern Rhaetian Alps)",
+        *[("Vorarlberg and Tyrol" if name == "Tyrol" else name) + ": shared by\n" +
+          " + ".join(ENTITIES[e]["label"] for e in ents) for name, ents in shared],
         "Outside the study area (paler)",
         "National border",
         "Regional border (Lombardy)",
+        "River",
         "Head office",
-        "Direction and distance of a head office beyond the map",
-        "From an entity based outside the map to its territories",
+        "Direction of a head office\nbeyond the map",
+        "From an entity based beyond\nthe map to its territories",
         f"Alpine club ({n_club})",
         f"Public authority ({n_auth})",
     ]
-    fig.legend(handles, labels, loc="lower center", bbox_to_anchor=(0.5, 0.095), ncol=4,
-               frameon=False, fontsize=9, handlelength=2.4, handleheight=1.1,
-               columnspacing=1.5, labelcolor=C["text"],
-               handler_map={club_h: HandlerBadge(True, False), auth_h: HandlerBadge(False, True)})
+    hmap = {club_h: HandlerBadge(True, False), auth_h: HandlerBadge(False, True)}
+    for h, (_, ents) in zip(stripe_h, shared):
+        hmap[h] = HandlerStripes([tint(ENTITIES[e]["colour"]) for e in ents])
+    leg = fig.legend(handles, labels, loc="upper left", bbox_to_anchor=(lx, 0.99), ncol=1,
+                     frameon=False, fontsize=10, handlelength=2.6, handleheight=1.3, labelspacing=0.75,
+                     labelcolor=C["text"], handler_map=hmap, title="Map symbols", title_fontsize=11,
+                     alignment="left")
+    fig.add_artist(leg)
 
     key_h = [Patch(fc=tint(a["colour"]), ec=a["ink"], lw=1.0) for a in ENTITIES.values()]
-    key_l = [f"{a['label']}  {a['name']} ({a['hq']})" for a in ENTITIES.values()]
-    fig.legend(key_h, key_l, loc="lower center", bbox_to_anchor=(0.5, 0.045), ncol=4,
-               frameon=False, fontsize=9, handlelength=1.4, columnspacing=1.5, labelcolor=C["text"],
-               title="Territory colour = entity operating huts there", title_fontsize=9)
+    key_l = [f"{a['label']}  {a['name']}\n        head office: {a['hq']}" for a in ENTITIES.values()]
+    fig.legend(key_h, key_l, loc="lower left", bbox_to_anchor=(lx, 0.085), ncol=1,
+               frameon=False, fontsize=10, handlelength=2.0, handleheight=1.3, labelspacing=0.7,
+               labelcolor=C["text"], title="Entities (territory colour)", title_fontsize=11, alignment="left")
 
-    fig.text(0.5, 0.008, SOURCE + (LOGO_CREDIT if any_logo else "") + (("\n" + DEM_CREDIT.strip()) if RELIEF_USED else ""), ha="center", va="bottom",
-             size=8, color=C["muted"], linespacing=1.4)
+    fig.text(0.012, 0.012, SOURCE + (LOGO_CREDIT if any_logo else "") + (("\n" + DEM_CREDIT.strip()) if RELIEF_USED else ""),
+             ha="left", va="bottom", size=9, color=C["muted"], linespacing=1.4)
 
     for ext in ("png", "pdf", "svg"):
         fig.savefig(f"{args.out}.{ext}", dpi=300, facecolor=fig.get_facecolor())
