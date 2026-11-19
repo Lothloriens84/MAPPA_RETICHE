@@ -103,6 +103,7 @@ Use `--logos other/folder` to point elsewhere, or `--logos none` for a version w
 - **Rivers.** Natural Earth 1:10m rivers and lake centerlines plus the Europe supplement, trimmed to the
   Alpine area (`ne_data/ne_10m_rivers_alps.geojson`). The Sarca is not in the dataset at this scale and is digitised by
   hand along its valley (Val Genova – Pinzolo – Tione – Ponte Arche – Sarche – Arco – Torbole; `HAND_RIVERS`, approximate).
+  Lakes Iseo and Idro, missing from the Natural Earth 1:10m lakes layer, are digitised by hand too (`HAND_LAKES`).
 
 ## Sources and licences
 

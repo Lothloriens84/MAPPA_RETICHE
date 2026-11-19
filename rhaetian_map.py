@@ -161,7 +161,16 @@ DEM_CREDIT = (" Relief: Copernicus DEM GLO-90 (© DLR e.V. 2010–2014 and © Ai
               "provided under COPERNICUS by the European Union and ESA).")
 
 # Rivers (Natural Earth 1:10m rivers + Europe supplement, trimmed: ne_data/ne_10m_rivers_alps.geojson)
-RIVER_COLOUR = "#6FA3BE"
+RIVER_COLOUR = "#3F86B5"
+# Lakes missing from Natural Earth 1:10m (main layer), digitised by hand (approximate)
+HAND_LAKES = {
+    "Lago d'Iseo": [(9.960, 45.668), (10.000, 45.660), (10.050, 45.658), (10.098, 45.688), (10.112, 45.715),
+                    (10.098, 45.742), (10.110, 45.808), (10.072, 45.818), (10.062, 45.795), (10.040, 45.770),
+                    (10.042, 45.712), (10.010, 45.682), (9.960, 45.668)],
+    "Lago d'Idro":  [(10.530, 45.808), (10.536, 45.790), (10.528, 45.770), (10.521, 45.755), (10.508, 45.740),
+                     (10.500, 45.736), (10.494, 45.742), (10.503, 45.758), (10.511, 45.775), (10.519, 45.795),
+                     (10.524, 45.808), (10.530, 45.808)],
+}
 # Rivers missing from Natural Earth at 1:10m, digitised by hand (approximate, ±1-2 km)
 HAND_RIVERS = {
     "Sarca": [(10.63, 46.175), (10.70, 46.170), (10.758, 46.168), (10.765, 46.150), (10.752, 46.118),
@@ -547,15 +556,17 @@ def draw_base(ax, ne_dir, frame, territory_labels=True, section_labels="code", v
             p = geom_to_path(f["geometry"])
             if p:
                 ax.add_patch(PathPatch(p, fc=C["lake"], ec="none", zorder=3.5))
+    for name, ring in HAND_LAKES.items():
+        ax.add_patch(PathPatch(ring_path([ring]), fc=C["lake"], ec=RIVER_COLOUR, lw=0.4, zorder=3.5))
 
     # rivers
     fn = os.path.join(ne_dir, "ne_10m_rivers_alps.geojson")
     if os.path.exists(fn):
-        rivers = load(fn) + [{"properties": {"name": n, "scalerank": 10},
+        rivers = load(fn) + [{"properties": {"name": n, "scalerank": 8},
                               "geometry": {"coordinates": [pts]}} for n, pts in HAND_RIVERS.items()]
         for f in rivers:
             r = f["properties"].get("scalerank") or 10
-            lw = 1.4 if r <= 6 else 1.1 if r <= 8 else 0.85
+            lw = 1.7 if r <= 6 else 1.4 if r <= 8 else 1.1
             for line in f["geometry"]["coordinates"]:
                 ax.add_patch(PathPatch(line_path(line), fc="none", ec=RIVER_COLOUR, lw=lw,
                                        capstyle="round", joinstyle="round", zorder=3.45))
@@ -579,7 +590,7 @@ def draw_base(ax, ne_dir, frame, territory_labels=True, section_labels="code", v
                 ang = math.degrees(math.atan2(y1_ - y0_, x1_ - x0_))
                 ang = ang - 180 if ang > 90 else ang + 180 if ang < -90 else ang
                 ax.text((x0_ + x1_) / 2, (y0_ + y1_) / 2, label, rotation=ang, rotation_mode="anchor",
-                        ha="center", va="bottom", size=8.2, style="italic", color="#3E7896", zorder=6.2,
+                        ha="center", va="bottom", size=9, style="italic", color="#2C6E96", zorder=6.2,
                         path_effects=[pe.withStroke(linewidth=2.2, foreground="white")])
 
     # SOIUSA section limits and labels
