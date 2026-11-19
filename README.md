@@ -10,6 +10,10 @@ Source code for two maps of the PhD thesis (*Food Heritage: Cultures and Identit
 The map shows the study area (SOIUSA sections II/A-15 Western, II/A-16 Eastern and
 II/C-28 Southern Rhaetian Alps) and the administrative territories in which eight
 hut-governing entities (seven alpine clubs and one public authority) own or operate huts.
+Each territory is coloured by the entity that operates huts there, with diagonal stripes where
+several entities share it (Vorarlberg and Tyrol: DAV and ÖAV; South Tyrol: CAI, AVS and the
+Province). An arrow runs from each entity to the city of its head office, and a locator in the
+top-left corner shows where the study area lies in Europe.
 
 ## Contents
 
@@ -17,7 +21,7 @@ hut-governing entities (seven alpine clubs and one public authority) own or oper
 |---|---|
 | `rhaetian_map.py` | Figure 1. All settings (outline, territories, labels, colours) are in its CONFIG section. |
 | `heritage_map.py` | Companion map: protected areas, territorial quality labels, valley initiatives and UNESCO intangible heritage on the Figure 1 base. Imports the base settings from `rhaetian_map.py`. |
-| `ne_data/` | Natural Earth 1:10m boundaries, trimmed to the Alpine area (7.5–14.2°E, 44.3–48.9°N). |
+| `ne_data/` | Natural Earth 1:10m boundaries, trimmed to the Alpine area (5.5–14.2°E, 44.3–49.3°N), plus a simplified Europe layer for the locator. |
 | `logos/` | Entity logos (PNG, trimmed), named by entity key: LAV, SAC, CAI, DAV, OEAV, AVS, APS, SAT. |
 | `output/` | The rendered figure (PDF, PNG at 300 dpi, SVG). |
 | `requirements.txt` | Python dependencies (matplotlib only). |
@@ -64,8 +68,13 @@ Use `--logos other/folder` to point elsewhere, or `--logos none` for a version w
   latitude (≈46.6°N). The scale bar is therefore approximate.
 - **Protected areas (heritage map).** Nine outlines digitised by hand around towns, valleys and passes,
   accurate to a few km; schematic, not official boundaries, until replaced with `--parks`.
-- **Shading.** Each operating territory is shown pale in full, and in full colour where it lies
-  inside the study area.
+- **Shading (Figure 1).** Each operating territory takes the colour of the entity running huts there
+  (`TERRITORY_ENTITIES` in the script); shared territories are striped. Everything outside the study
+  area sits under a white veil, so the part of each territory inside the study area stands out.
+- **Head offices (Figure 1).** LAV: Schaan; SAC: Bern; CAI: Milan; DAV: Munich; ÖAV: Innsbruck;
+  AVS: Bolzano; Autonomous Province: Bolzano; SAT: Trento (from each entity's own website or statute,
+  November 2026). Figure 1 uses a wider frame than the heritage map so that all of them are on the map.
+- **Locator.** Europe from Natural Earth 1:10m countries, simplified (Douglas–Peucker, 0.04°).
 
 ## Sources and licences
 

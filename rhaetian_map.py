@@ -9,7 +9,7 @@ GeoJSON boundaries and draws
     full tint inside the study area, pale tint for the rest of the unit,
   * a badge per entity (logo file, or a text badge), with alpine clubs and
     the public authority drawn in two distinct styles,
-  * an arrow from each badge to each territory where it operates,
+  * the head-office city of each entity, with an arrow from its badge,
   * a legend and a source line.
 
 Usage
@@ -30,11 +30,13 @@ import json
 import math
 import os
 
+import numpy as np
+
 import matplotlib.pyplot as plt
 from matplotlib.legend_handler import HandlerPatch
 from matplotlib.lines import Line2D
 from matplotlib.offsetbox import AnnotationBbox, OffsetImage, TextArea, VPacker
-from matplotlib.patches import PathPatch, FancyBboxPatch, Patch
+from matplotlib.patches import PathPatch, FancyBboxPatch, Patch, Rectangle
 from matplotlib.path import Path
 import matplotlib.colors as mcolors
 import matplotlib.patheffects as pe
@@ -43,8 +45,12 @@ import matplotlib.patheffects as pe
 # CONFIG
 # ════════════════════════════════════════════════════════════════════════════
 
-LON_MIN, LON_MAX = 8.75, 12.95
+LON_MIN, LON_MAX = 8.75, 12.95      # base extent (also used by heritage_map.py)
 LAT_MIN, LAT_MAX = 45.55, 47.62
+
+# Figure 1 frame: wider than the base extent so that every head office is on the map
+F1_LON_MIN, F1_LON_MAX = 7.10, 12.35
+F1_LAT_MIN, F1_LAT_MAX = 45.28, 48.32
 
 C = dict(
     paper="#FFFFFF",
@@ -64,7 +70,26 @@ COUNTRY_FILL = {
     "Switzerland":   "#D9D1E3",   # heather
     "Liechtenstein": "#BBD3DC",   # glacier
 }
-PALE_MIX = 0.55    # share of the territory colour kept outside the study area
+PALE_MIX = 0.55    # share of the territory colour kept outside the study area (heritage map)
+
+# Figure 1: territories are coloured by the entity (or entities) operating huts there.
+# Shared territories get diagonal stripes, one per entity.
+TERRITORY_ENTITIES = {
+    "LI":  ["LAV"],
+    "GR":  ["SAC"],
+    "VBG": ["DAV", "OEAV"],
+    "TIR": ["DAV", "OEAV"],
+    "SO":  ["CAI"],
+    "BS":  ["CAI"],
+    "BZ":  ["CAI", "AVS", "APS"],
+    "TN":  ["SAT"],
+}
+TINT = 0.50          # share of the entity colour in the territory fill (rest is white)
+STRIPE_W = 0.075     # stripe width, map units (~6 km)
+VEIL = 0.62          # white veil over everything outside the study area (0 = none)
+
+# Locator inset (Europe), placed in the map's top-left corner
+INSET = dict(lon=(-11.0, 31.0), lat=(35.0, 61.0), width=0.20)   # width as share of map width
 
 # Study area: SOIUSA II/A-15 Western Rhaetian Alps + II/A-16 Eastern Rhaetian Alps
 # + II/C-28 Southern Rhaetian Alps (Marazzi 2005). Approximate outline traced along
@@ -113,26 +138,43 @@ TERRITORIES = {
     "TN":  ("admin1", "Italy",         "Trento",        "Trentino",    10.82, 46.24),
 }
 
+# Head offices (seat of each entity): city -> (lon, lat, label offset in points, label alignment)
+#   LAV  Steinegerta 26, Schaan          SAC  Monbijoustrasse 61, Bern
+#   CAI  Via E. Petrella 19, Milan       DAV  Anni-Albers-Straße 7, Munich
+#   ÖAV  Olympiastraße 37, Innsbruck     AVS  seat in Bolzano (statute, art. 1)
+#   APS  Bolzano (provincial capital)    SAT  Via Manci 57, Trento
+CITIES = {
+    "Schaan":    (9.508, 47.166, (-6, 0), "right"),
+    "Bern":      (7.447, 46.948, (0, -9), "center"),
+    "Milan":     (9.190, 45.464, (7, 0), "left"),
+    "Munich":    (11.576, 48.137, (-7, 0), "right"),
+    "Innsbruck": (11.393, 47.269, (0, 7), "center"),
+    "Bolzano":   (11.354, 46.498, (7, 0), "left"),
+    "Trento":    (11.121, 46.067, (7, -2), "left"),
+}
+
 # Entities.  kind = "club" (alpine club) or "authority" (public body).
 #   badge   : badge centre in AXES fraction (values <0 or >1 sit in the margin)
-#   targets : (territory key, arrow-tip lon, arrow-tip lat)
+#   hq      : head-office city (key in CITIES); the arrow runs from the badge to it
+#   rad     : curvature of that arrow
+#   targets : operating territories (used by heritage_map.py)
 ENTITIES = {
     "LAV":  dict(kind="club", label="LAV", name="Liechtensteiner\nAlpenverein", colour="#3F6E8C",
-                 badge=(-0.115, 0.86), targets=[("LI", 9.56, 47.12)]),
+                 badge=(0.30, 1.07), hq="Schaan", rad=0.15, targets=[("LI", 9.56, 47.12)]),
     "SAC":  dict(kind="club", label="SAC", name="Schweizer\nAlpen-Club", colour="#9E3B33",
-                 badge=(-0.115, 0.52), targets=[("GR", 9.80, 46.58)]),
+                 badge=(-0.115, 0.62), hq="Bern", rad=-0.15, targets=[("GR", 9.80, 46.58)]),
     "CAI":  dict(kind="club", label="CAI", name="Club Alpino\nItaliano", colour="#2F6B4F",
-                 badge=(-0.115, 0.17), targets=[("SO", 10.02, 46.36), ("BS", 10.45, 46.08)]),
+                 badge=(-0.115, 0.20), hq="Milan", rad=0.20, targets=[("SO", 10.02, 46.36), ("BS", 10.45, 46.08)]),
     "DAV":  dict(kind="club", label="DAV", name="Deutscher\nAlpenverein", colour="#3C4A7A",
-                 badge=(0.30, 1.12), targets=[("VBG", 9.90, 47.06), ("TIR", 10.82, 47.10)]),
+                 badge=(0.62, 1.07), hq="Munich", rad=-0.2, targets=[("VBG", 9.90, 47.06), ("TIR", 10.82, 47.10)]),
     "OEAV": dict(kind="club", label="ÖAV", name="Österreichischer\nAlpenverein", colour="#B5562C",
-                 badge=(0.66, 1.12), targets=[("VBG", 10.12, 47.02), ("TIR", 11.25, 47.12)]),
+                 badge=(1.115, 0.86), hq="Innsbruck", rad=0.15, targets=[("VBG", 10.12, 47.02), ("TIR", 11.25, 47.12)]),
     "AVS":  dict(kind="club", label="AVS", name="Alpenverein\nSüdtirol", colour="#7A5C2E",
-                 badge=(1.115, 0.78), targets=[("BZ", 11.25, 46.86)]),
+                 badge=(1.115, 0.60), hq="Bolzano", rad=0.12, targets=[("BZ", 11.25, 46.86)]),
     "APS":  dict(kind="authority", label="APS", name="Provincia autonoma\ndi Bolzano",
-                 colour="#6E4F7A", badge=(1.115, 0.46), targets=[("BZ", 11.05, 46.58)]),
-    "SAT":  dict(kind="club", label="SAT", name="Società degli Alpinisti\nTridentini", colour="#4E7D3A",
-                 badge=(1.115, 0.14), targets=[("TN", 11.00, 46.34)]),
+                 colour="#6E4F7A", badge=(1.115, 0.36), hq="Bolzano", rad=-0.12, targets=[("BZ", 11.05, 46.58)]),
+    "SAT":  dict(kind="club", label="SAT", name="Società degli Alpinisti\nTridentini", colour="#B8860B",
+                 badge=(1.115, 0.11), hq="Trento", rad=-0.15, targets=[("TN", 11.00, 46.34)]),
 }
 
 # Country labels (English). Liechtenstein gets a leader line.
@@ -143,6 +185,15 @@ COUNTRY_LABELS = [
     ("ITALY", 12.40, 45.72),
 ]
 LI_LABEL = ("LIECHTENSTEIN", 9.10, 47.41, 9.51, 47.19)   # text lon/lat, leader-tip lon/lat
+
+# Figure 1 positions for the same labels in its wider frame
+F1_COUNTRY_LABELS = [
+    ("SWITZERLAND", 8.15, 46.55),
+    ("AUSTRIA", 12.00, 47.55),
+    ("GERMANY", 10.20, 48.05),
+    ("ITALY", 11.90, 45.55),
+]
+F1_LI_LABEL = ("LIECHTENSTEIN", 8.75, 47.40, 9.53, 47.14)
 
 # Region-tier labels (units the text refers to that are not operating territories)
 REGION_LABELS = [
@@ -228,6 +279,78 @@ def pale(hex_colour, mix=PALE_MIX):
     return (r0 + (r1 - r0) * mix, g0 + (g1 - g0) * mix, b0 + (b1 - b0) * mix)
 
 
+def tint(hex_colour, share=None):
+    share = TINT if share is None else share
+    r, g, b = mcolors.to_rgb(hex_colour)
+    return (1 - (1 - r) * share, 1 - (1 - g) * share, 1 - (1 - b) * share)
+
+
+def draw_stripes(ax, path, cols, clip_patch, width=None):
+    """Diagonal stripes in the given colours, clipped to a territory."""
+    width = STRIPE_W if width is None else width
+    (x0, y0), (x1, y1) = path.get_extents().get_points()
+    px = width / 24
+    nx, ny = int((x1 - x0) / px) + 2, int((y1 - y0) / px) + 2
+    xs = x0 + (np.arange(nx) + 0.5) * px
+    ys = y0 + (np.arange(ny) + 0.5) * px
+    band = (np.floor((xs[None, :] + ys[:, None]) / width).astype(int)) % len(cols)
+    rgb = np.array([mcolors.to_rgb(c) for c in cols])[band]
+    im = ax.imshow(rgb, extent=(x0, x0 + nx * px, y0, y0 + ny * px), origin="lower",
+                   interpolation="nearest", zorder=2.1, aspect="auto")
+    im.set_clip_path(clip_patch)
+    return im
+
+
+def pale_of(rgb):
+    return tuple(c + (1 - c) * VEIL for c in mcolors.to_rgb(rgb))
+
+
+def outside_path():
+    """A large rectangle with the study area cut out (for the veil)."""
+    ring = [proj(x, y) for x, y in STUDY_AREA]
+    signed = sum(ring[i][0] * ring[i + 1][1] - ring[i + 1][0] * ring[i][1] for i in range(len(ring) - 1))
+    if signed > 0:              # make the hole run opposite to the (counter-clockwise) rectangle
+        ring = ring[::-1]
+    big = [proj(-30, 20), proj(60, 20), proj(60, 75), proj(-30, 75), proj(-30, 20)]
+    verts = big + ring
+    codes = ([Path.MOVETO] + [Path.LINETO] * 3 + [Path.CLOSEPOLY] +
+             [Path.MOVETO] + [Path.LINETO] * (len(ring) - 2) + [Path.CLOSEPOLY])
+    return Path(verts, codes)
+
+
+def draw_locator(fig, ax, ne_dir, frame):
+    """Europe locator in the top-left corner of the map, with the study area in red."""
+    fn = os.path.join(ne_dir, "ne_europe_simplified.geojson")
+    if not os.path.exists(fn):
+        return
+    ax.apply_aspect()
+    pos = ax.get_position()
+    (l0, l1), (b0, b1) = INSET["lon"], INSET["lat"]
+    k = math.cos(math.radians((b0 + b1) / 2))
+    w = pos.width * INSET["width"]
+    fw, fh = fig.get_size_inches()
+    h = w * fw / fh * (b1 - b0) / ((l1 - l0) * k)
+    ia = fig.add_axes([pos.x0 + 0.004, pos.y1 - h - 0.004 * fw / fh, w, h], zorder=20)
+    ia.set_facecolor("#E9F1F4")
+    for f in load(fn):
+        pp = []
+        for poly in rings_of(f["geometry"]):
+            pp.append([(x * k, y) for x, y in poly[0]])
+        for r in pp:
+            ia.add_patch(plt.Polygon(r, closed=True, fc="#FFFFFF", ec="#B9B2A6", lw=0.3))
+    ia.add_patch(plt.Polygon([(x * k, y) for x, y in STUDY_AREA], closed=True,
+                             fc="#C0392B", ec="#7B241C", lw=0.4, zorder=5))
+    (fx0, fy0), (fx1, fy1) = frame
+    ia.add_patch(Rectangle((fx0 * k, fy0), (fx1 - fx0) * k, fy1 - fy0, fc="none",
+                           ec=C["text"], lw=0.8, zorder=6))
+    ia.set_xlim(l0 * k, l1 * k); ia.set_ylim(b0, b1)
+    ia.set_xticks([]); ia.set_yticks([])
+    for sp in ia.spines.values():
+        sp.set_edgecolor(C["border_country"]); sp.set_linewidth(0.8)
+    ia.text(0.03, 0.03, "Europe", transform=ia.transAxes, size=6.5, color=C["muted"],
+            style="italic", va="bottom")
+
+
 def load(path):
     with open(path, encoding="utf-8") as f:
         return json.load(f)["features"]
@@ -299,8 +422,8 @@ def main():
     lakes = load(os.path.join(args.ne_dir, "ne_10m_lakes.geojson"))
 
     plt.rcParams["font.family"] = "DejaVu Sans"
-    fig = plt.figure(figsize=(11.5, 9.0), facecolor=C["paper"])
-    ax = fig.add_axes([0.14, 0.145, 0.72, 0.607])
+    fig = plt.figure(figsize=(11.5, 10.0), facecolor=C["paper"])
+    ax = fig.add_axes([0.14, 0.13, 0.72, 0.665])
     ax.set_facecolor(C["other"])
 
     # 1 — background admin units
@@ -330,16 +453,21 @@ def main():
         if geom is None:
             raise SystemExit(f"Territory not found in Natural Earth: {lvl} {ctry} {ne_name}")
         path = geom_to_path(geom)
-        ax.add_patch(PathPatch(path, fc=pale(COUNTRY_FILL[ctry]), ec="white", lw=1.0, zorder=2))
-        inner = PathPatch(path, fc=COUNTRY_FILL[ctry], ec="white", lw=1.0, zorder=2.2)
-        ax.add_patch(inner)
-        inner.set_clip_path(study)
+        cols = [tint(ENTITIES[e]["colour"]) for e in TERRITORY_ENTITIES[key]]
+        shape = PathPatch(path, fc=cols[0], ec="none", zorder=2)
+        ax.add_patch(shape)
+        if len(cols) > 1:
+            draw_stripes(ax, path, cols, shape)
+        ax.add_patch(PathPatch(path, fc="none", ec="white", lw=1.0, zorder=2.3))
         if label:
             x, y = proj(lx, ly)
-            halo = COUNTRY_FILL[ctry] if study.get_path().contains_point((x, y)) else pale(COUNTRY_FILL[ctry])
             ax.text(x, y, label, ha="center", va="center", size=8.6, style="italic",
                     color=C["text"], zorder=6,
-                    path_effects=[pe.withStroke(linewidth=2.4, foreground=halo)])
+                    path_effects=[pe.withStroke(linewidth=2.6, foreground="white")])
+
+    # 3b — white veil outside the study area: everything there reads paler
+    if VEIL:
+        ax.add_patch(PathPatch(outside_path(), fc="white", ec="none", alpha=VEIL, zorder=2.4))
 
     # 4 — region boundary (Lombardy, dissolved from its provinces)
     ctry, reg = REGION_OUTLINE
@@ -364,11 +492,11 @@ def main():
                 ax.add_patch(PathPatch(p, fc=C["lake"], ec="none", zorder=3.5))
 
     # 7 — country and region labels
-    for txt, lon, lat in COUNTRY_LABELS:
+    for txt, lon, lat in F1_COUNTRY_LABELS:
         x, y = proj(lon, lat)
         ax.text(x, y, txt, ha="center", va="center", size=9.5, color=C["muted"],
                 weight="bold", alpha=0.85, zorder=4)
-    t, lon, lat, tlon, tlat = LI_LABEL
+    t, lon, lat, tlon, tlat = F1_LI_LABEL
     ax.annotate(t, xy=proj(tlon, tlat), xytext=proj(lon, lat), ha="center", va="center",
                 size=8, color=C["muted"], weight="bold", zorder=4,
                 arrowprops=dict(arrowstyle="-", color=C["muted"], lw=0.7, shrinkA=2, shrinkB=0))
@@ -378,29 +506,33 @@ def main():
                 style="italic", weight="bold", zorder=4,
                 path_effects=[pe.withStroke(linewidth=2.2, foreground=C["other"])])
 
-    x0, y0 = proj(LON_MIN, LAT_MIN)
-    x1, y1 = proj(LON_MAX, LAT_MAX)
+    x0, y0 = proj(F1_LON_MIN, F1_LAT_MIN)
+    x1, y1 = proj(F1_LON_MAX, F1_LAT_MAX)
     ax.set_xlim(x0, x1); ax.set_ylim(y0, y1)
     ax.set_aspect("equal")
     ax.set_xticks([]); ax.set_yticks([])
     for s in ax.spines.values():
         s.set_edgecolor(C["border_country"]); s.set_linewidth(0.8)
 
-    # 8 — arrows + badges
+    # 8 — head-office cities, arrows from each badge to its city, badges
+    for city, (lon, lat, off, ha) in CITIES.items():
+        x, y = proj(lon, lat)
+        ax.plot(x, y, "o", ms=6.5, mfc="white", mec=C["text"], mew=1.6, zorder=8.5)
+        ax.plot(x, y, "o", ms=2.2, mfc=C["text"], mec="none", zorder=8.6)
+        ax.annotate(city, (x, y), xytext=off, textcoords="offset points", ha=ha, va="center",
+                    size=8.4, weight="bold", color=C["text"], zorder=8.7,
+                    path_effects=[pe.withStroke(linewidth=2.6, foreground="white")])
+
     badges_with_logo = []
     for key, a in ENTITIES.items():
         ls = (0, (4, 2)) if a["kind"] == "authority" else "-"
-        for terr, tlon, tlat in a["targets"]:
-            tx, ty = proj(tlon, tlat)
-            bx, by = a["badge"]
-            rad = 0.18 if bx > 0.5 or by > 1 else -0.18
-            ax.annotate("", xy=(tx, ty), xycoords="data",
-                        xytext=(bx, by), textcoords="axes fraction",
-                        arrowprops=dict(arrowstyle="-|>,head_length=0.55,head_width=0.28",
-                                        color=a["colour"], lw=1.5, ls=ls, shrinkA=30, shrinkB=1,
-                                        connectionstyle=f"arc3,rad={rad}"),
-                        annotation_clip=False, zorder=7)
-            ax.plot(tx, ty, "o", ms=3.2, mfc="white", mec=a["colour"], mew=1.2, zorder=8)
+        lon, lat = CITIES[a["hq"]][:2]
+        ax.annotate("", xy=proj(lon, lat), xycoords="data",
+                    xytext=a["badge"], textcoords="axes fraction",
+                    arrowprops=dict(arrowstyle="-|>,head_length=0.55,head_width=0.28",
+                                    color=a["colour"], lw=1.5, ls=ls, shrinkA=30, shrinkB=4.5,
+                                    connectionstyle=f"arc3,rad={a['rad']}"),
+                    annotation_clip=False, zorder=7)
         ab = AnnotationBbox(make_badge(a), a["badge"], xycoords="axes fraction",
                             frameon=True, annotation_clip=False, zorder=9, pad=0.45,
                             bboxprops=badge_box(a))
@@ -423,12 +555,12 @@ def main():
 
     # 9 — scale bar and north arrow
     sb_len = 50 / 111.32
-    sx, sy = proj(LON_MIN + 0.12, LAT_MIN + 0.10)
+    sx, sy = proj(F1_LON_MIN + 0.15, F1_LAT_MIN + 0.12)
     ax.plot([sx, sx + sb_len], [sy, sy], color=C["text"], lw=2.2, solid_capstyle="butt", zorder=8)
     ax.plot([sx, sx + sb_len / 2], [sy, sy], color="white", lw=1.0, solid_capstyle="butt", zorder=9)
     for xx, t in [(sx, "0"), (sx + sb_len / 2, "25"), (sx + sb_len, "50 km")]:
         ax.text(xx, sy + 0.035, t, ha="center", va="bottom", size=7, color=C["text"], zorder=9)
-    nx, ny = proj(LON_MAX - 0.18, LAT_MIN + 0.12)
+    nx, ny = proj(F1_LON_MAX - 0.2, F1_LAT_MIN + 0.14)
     ax.annotate("N", xy=(nx, ny + 0.17), xytext=(nx, ny), ha="center", va="top",
                 size=9, weight="bold", color=C["text"],
                 arrowprops=dict(arrowstyle="-|>", color=C["text"], lw=1.4), zorder=9)
@@ -439,29 +571,37 @@ def main():
     club_h, auth_h = Patch(), Patch(label="_")
     handles = [
         Line2D([], [], color=C["study"], lw=1.5),
-        Patch(fc=COUNTRY_FILL["Italy"], ec="white"),
-        Patch(fc=pale(COUNTRY_FILL["Italy"]), ec="white"),
+        Patch(fc=tint(ENTITIES["CAI"]["colour"]), ec="white"),
+        Patch(fc=tint(ENTITIES["DAV"]["colour"]), ec="white", hatch="////",
+              hatchcolor=tint(ENTITIES["OEAV"]["colour"], 0.75), lw=0),
+        Patch(fc=pale_of(tint(ENTITIES["CAI"]["colour"])), ec="white"),
         Line2D([], [], color=C["border_country"], lw=1.1, ls=(0, (5, 1.6))),
         Line2D([], [], color=C["border_region"], lw=0.9),
+        Line2D([], [], ls="none", marker="o", ms=6.5, mfc="white", mec=C["text"], mew=1.6),
         club_h, auth_h,
     ]
     labels = [
         "Rhaetian Alps (study area, approx.)",
-        "Operating territory, inside study area",
+        "Operating territory (colour of the entity)",
+        "Territory shared by several entities",
         "Operating territory, outside study area",
         "National border",
         "Regional border (Lombardy)",
+        "Head office (arrow from the entity)",
         f"Alpine club ({n_club})",
         f"Public authority ({n_auth})",
     ]
-    leg = fig.legend(handles, labels, loc="lower center", bbox_to_anchor=(0.5, 0.0635), ncol=4,
+    leg = fig.legend(handles, labels, loc="lower center", bbox_to_anchor=(0.5, 0.052), ncol=4,
                      frameon=False, fontsize=7.6, handlelength=2.4, handleheight=1.1,
                      columnspacing=1.6, labelcolor=C["text"],
                      handler_map={club_h: HandlerBadge(True, False), auth_h: HandlerBadge(False, True)})
 
+    # 10b — Europe locator
+    draw_locator(fig, ax, args.ne_dir, ((F1_LON_MIN, F1_LAT_MIN), (F1_LON_MAX, F1_LAT_MAX)))
+
     # 11 — title + source line
     fig.text(0.5, 0.975, TITLE, ha="center", va="top", size=13.5, weight="bold", color=C["text"])
-    fig.text(0.5, 0.017, SOURCE + (LOGO_CREDIT if any_logo else ""), ha="center", va="bottom",
+    fig.text(0.5, 0.015, SOURCE + (LOGO_CREDIT if any_logo else ""), ha="center", va="bottom",
              size=7.2, color=C["muted"], linespacing=1.4)
 
     for ext in ("png", "pdf", "svg"):
