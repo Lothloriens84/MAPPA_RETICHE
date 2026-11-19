@@ -74,16 +74,19 @@ PALE_MIX = 0.55    # share of the territory colour kept outside the study area (
 
 # Figure 1: territories are coloured by the entity (or entities) operating huts there.
 # Shared territories get diagonal stripes, one per entity.
-TERRITORY_ENTITIES = {
-    "LI":  ["LAV"],
-    "GR":  ["SAC"],
-    "VBG": ["DAV", "OEAV"],
-    "TIR": ["DAV", "OEAV"],
-    "SO":  ["CAI"],
-    "BS":  ["CAI"],
-    "BZ":  ["CAI", "AVS", "APS"],
-    "TN":  ["SAT"],
-}
+# Drawn in order: whole countries first, then the units with their own arrangement on top.
+#   (admin level, country, Natural Earth name, entities)
+F1_TERRITORIES = [
+    ("admin0", "Italy",         "Italy",         ["CAI"]),
+    ("admin0", "Germany",       "Germany",       ["DAV"]),
+    ("admin0", "Switzerland",   "Switzerland",   ["SAC"]),
+    ("admin0", "Austria",       "Austria",       ["OEAV"]),
+    ("admin0", "Liechtenstein", "Liechtenstein", ["LAV"]),
+    ("admin1", "Austria",       "Vorarlberg",    ["DAV", "OEAV"]),
+    ("admin1", "Austria",       "Tirol",         ["DAV", "OEAV"]),
+    ("admin1", "Italy",         "Bozen",         ["CAI", "AVS", "APS"]),
+    ("admin1", "Italy",         "Trento",        ["SAT"]),
+]
 TINT = 0.50          # share of the entity colour in the territory fill (rest is white)
 STRIPE_W = 0.075     # stripe width, map units (~6 km)
 VEIL = 0.62          # white veil over everything outside the study area (0 = none)
@@ -158,15 +161,20 @@ CITIES = {
 #   hq      : head-office city (key in CITIES); the arrow runs from the badge to it
 #   rad     : curvature of that arrow
 #   targets : operating territories (used by heritage_map.py)
+#   reach   : for entities with a head office outside the study area, thinner arrows from
+#             that city to their territories inside it: (lon, lat, curvature)
 ENTITIES = {
     "LAV":  dict(kind="club", label="LAV", name="Liechtensteiner\nAlpenverein", colour="#3F6E8C",
                  badge=(0.30, 1.07), hq="Schaan", rad=0.15, targets=[("LI", 9.56, 47.12)]),
     "SAC":  dict(kind="club", label="SAC", name="Schweizer\nAlpen-Club", colour="#9E3B33",
-                 badge=(-0.115, 0.62), hq="Bern", rad=-0.15, targets=[("GR", 9.80, 46.58)]),
+                 badge=(-0.115, 0.62), hq="Bern", rad=-0.15, targets=[("GR", 9.80, 46.58)],
+                 reach=[(9.72, 46.66, -0.2)]),
     "CAI":  dict(kind="club", label="CAI", name="Club Alpino\nItaliano", colour="#2F6B4F",
-                 badge=(-0.115, 0.20), hq="Milan", rad=0.20, targets=[("SO", 10.02, 46.36), ("BS", 10.45, 46.08)]),
+                 badge=(-0.115, 0.20), hq="Milan", rad=0.20, targets=[("SO", 10.02, 46.36), ("BS", 10.45, 46.08)],
+                 reach=[(10.02, 46.30, 0.15), (10.42, 46.06, 0.15), (11.02, 46.62, 0.22)]),
     "DAV":  dict(kind="club", label="DAV", name="Deutscher\nAlpenverein", colour="#3C4A7A",
-                 badge=(0.62, 1.07), hq="Munich", rad=-0.2, targets=[("VBG", 9.90, 47.06), ("TIR", 10.82, 47.10)]),
+                 badge=(0.62, 1.07), hq="Munich", rad=-0.2, targets=[("VBG", 9.90, 47.06), ("TIR", 10.82, 47.10)],
+                 reach=[(9.92, 47.05, 0.18), (10.85, 47.08, 0.15)]),
     "OEAV": dict(kind="club", label="ÖAV", name="Österreichischer\nAlpenverein", colour="#B5562C",
                  badge=(1.115, 0.86), hq="Innsbruck", rad=0.15, targets=[("VBG", 10.12, 47.02), ("TIR", 11.25, 47.12)]),
     "AVS":  dict(kind="club", label="AVS", name="Alpenverein\nSüdtirol", colour="#7A5C2E",
@@ -448,17 +456,27 @@ def main():
         pr = f["properties"]
         idx[("admin0", pr["ADMIN"], pr["ADMIN"])] = f["geometry"]
 
-    for key, (lvl, ctry, ne_name, label, lx, ly) in TERRITORIES.items():
+    for i, (lvl, ctry, ne_name, ents) in enumerate(F1_TERRITORIES):
         geom = idx.get((lvl, ctry, ne_name))
         if geom is None:
             raise SystemExit(f"Territory not found in Natural Earth: {lvl} {ctry} {ne_name}")
         path = geom_to_path(geom)
-        cols = [tint(ENTITIES[e]["colour"]) for e in TERRITORY_ENTITIES[key]]
-        shape = PathPatch(path, fc=cols[0], ec="none", zorder=2)
+        z = 2 + i * 0.01
+        cols = [tint(ENTITIES[e]["colour"]) for e in ents]
+        shape = PathPatch(path, fc=cols[0], ec="none", zorder=z)
         ax.add_patch(shape)
         if len(cols) > 1:
-            draw_stripes(ax, path, cols, shape)
+            draw_stripes(ax, path, cols, shape).set_zorder(z + 0.005)
         ax.add_patch(PathPatch(path, fc="none", ec="white", lw=1.0, zorder=2.3))
+
+    # internal borders (provinces, states, cantons) back on top of the country fills
+    for f in adm1:
+        if f["properties"]["admin"] != "Liechtenstein" and bbox_hits(f["geometry"]):
+            p = geom_to_path(f["geometry"])
+            if p:
+                ax.add_patch(PathPatch(p, fc="none", ec="white", lw=0.55, zorder=2.25))
+
+    for key, (lvl, ctry, ne_name, label, lx, ly) in TERRITORIES.items():
         if label:
             x, y = proj(lx, ly)
             ax.text(x, y, label, ha="center", va="center", size=8.6, style="italic",
@@ -533,6 +551,13 @@ def main():
                                     color=a["colour"], lw=1.5, ls=ls, shrinkA=30, shrinkB=4.5,
                                     connectionstyle=f"arc3,rad={a['rad']}"),
                     annotation_clip=False, zorder=7)
+        for rlon, rlat, rrad in a.get("reach", []):
+            ax.annotate("", xy=proj(rlon, rlat), xycoords="data", xytext=proj(lon, lat), textcoords="data",
+                        arrowprops=dict(arrowstyle="-|>,head_length=0.45,head_width=0.22",
+                                        color=a["colour"], lw=1.1, ls=(0, (1.5, 1.5)),
+                                        shrinkA=5, shrinkB=2.5, connectionstyle=f"arc3,rad={rrad}"),
+                        zorder=7)
+            ax.plot(*proj(rlon, rlat), "o", ms=3.4, mfc="white", mec=a["colour"], mew=1.2, zorder=8)
         ab = AnnotationBbox(make_badge(a), a["badge"], xycoords="axes fraction",
                             frameon=True, annotation_clip=False, zorder=9, pad=0.45,
                             bboxprops=badge_box(a))
@@ -578,6 +603,8 @@ def main():
         Line2D([], [], color=C["border_country"], lw=1.1, ls=(0, (5, 1.6))),
         Line2D([], [], color=C["border_region"], lw=0.9),
         Line2D([], [], ls="none", marker="o", ms=6.5, mfc="white", mec=C["text"], mew=1.6),
+        Line2D([], [], color=C["text"], lw=1.1, ls=(0, (1.5, 1.5)), marker="o", ms=3.4,
+               mfc="white", mec=C["text"], markevery=[1]),
         club_h, auth_h,
     ]
     labels = [
@@ -588,6 +615,7 @@ def main():
         "National border",
         "Regional border (Lombardy)",
         "Head office (arrow from the entity)",
+        "From a head office outside the study area to its territories",
         f"Alpine club ({n_club})",
         f"Public authority ({n_auth})",
     ]

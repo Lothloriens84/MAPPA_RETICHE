@@ -10,10 +10,13 @@ Source code for two maps of the PhD thesis (*Food Heritage: Cultures and Identit
 The map shows the study area (SOIUSA sections II/A-15 Western, II/A-16 Eastern and
 II/C-28 Southern Rhaetian Alps) and the administrative territories in which eight
 hut-governing entities (seven alpine clubs and one public authority) own or operate huts.
-Each territory is coloured by the entity that operates huts there, with diagonal stripes where
-several entities share it (Vorarlberg and Tyrol: DAV and ÖAV; South Tyrol: CAI, AVS and the
-Province). An arrow runs from each entity to the city of its head office, and a locator in the
-top-left corner shows where the study area lies in Europe.
+Each club's territory is its whole country (CAI: Italy; DAV: Germany; SAC: Switzerland; ÖAV:
+Austria; LAV: Liechtenstein), with the units that have their own arrangement drawn on top and
+striped where entities share them (Vorarlberg and Tyrol: DAV and ÖAV; South Tyrol: CAI, AVS and
+the Province; Trentino: SAT). An arrow runs from each entity to the city of its head office; for
+the three with head offices outside the study area (CAI, SAC, DAV), dotted arrows continue from
+that city to their territories inside it. A locator in the top-left corner shows where the study
+area lies in Europe.
 
 ## Contents
 
@@ -69,7 +72,7 @@ Use `--logos other/folder` to point elsewhere, or `--logos none` for a version w
 - **Protected areas (heritage map).** Nine outlines digitised by hand around towns, valleys and passes,
   accurate to a few km; schematic, not official boundaries, until replaced with `--parks`.
 - **Shading (Figure 1).** Each operating territory takes the colour of the entity running huts there
-  (`TERRITORY_ENTITIES` in the script); shared territories are striped. Everything outside the study
+  (`F1_TERRITORIES` in the script); shared territories are striped. Everything outside the study
   area sits under a white veil, so the part of each territory inside the study area stands out.
 - **Head offices (Figure 1).** LAV: Schaan; SAC: Bern; CAI: Milan; DAV: Munich; ÖAV: Innsbruck;
   AVS: Bolzano; Autonomous Province: Bolzano; SAT: Trento (from each entity's own website or statute,
