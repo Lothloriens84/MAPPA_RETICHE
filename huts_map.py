@@ -140,12 +140,12 @@ def main():
                fontsize=8.8, handletextpad=0.5, columnspacing=1.2, labelcolor=C["text"],
                title="Huts by entity: total (of which position from database)", title_fontsize=9.5, alignment="left")
 
-    sym_h = [Line2D([], [], ls="none", marker="o", ms=ms, mfc="#999999", mec=C["text"], mew=0.7) for _, ms, _ in BEDS]
+    sym_h = [Line2D([], [], ls="none", marker="o", ms=ms, mfc="#DADADA", mec=C["text"], mew=0.7) for _, ms, _ in BEDS]
     sym_l = [lab for _, _, lab in BEDS]
-    sym_h += [Line2D([], [], ls="none", marker="o", ms=7.5, mfc="#999999", mec=C["text"], mew=0.7),
+    sym_h += [Line2D([], [], ls="none", marker="o", ms=7.5, mfc="#DADADA", mec=C["text"], mew=0.7),
               Line2D([], [], ls="none", marker="o", ms=7.5, mfc="white", mec="#555555", mew=1.6),
-              Line2D([], [], ls="none", marker="o", ms=7.5, mfc="#999999", mec=C["text"]),
-              Line2D([], [], ls="none", marker="s", ms=7.5, mfc="#999999", mec=C["text"]),
+              Line2D([], [], ls="none", marker="o", ms=7.5, mfc="#DADADA", mec=C["text"]),
+              Line2D([], [], ls="none", marker="s", ms=7.5, mfc="#DADADA", mec=C["text"]),
               Line2D([], [], color=C["study"], lw=1.6),
               Line2D([], [], color=C["section"], lw=0.9, ls=(0, (6, 2, 1.2, 2))),
               Patch(fc=rm.tint(ENTITIES["DAV"]["colour"]), ec="white", hatch="////",

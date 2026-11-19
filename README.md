@@ -83,7 +83,8 @@ Use `--logos other/folder` to point elsewhere, or `--logos none` for a version w
 - **Projection.** Figure 1 and the hut map: ETRS89-LAEA Europe (EPSG:3035), computed in the script with
   the ellipsoidal formulas (Snyder 1987), so the scale bar is exact. The heritage map still uses the earlier
   equirectangular base (longitude scaled by the cosine of ≈46.6°N); its scale bar is approximate.
-- **Colours.** Entity colours follow the Okabe–Ito palette, chosen to stay distinguishable with
+- **Colours.** Entity colours mostly follow the Okabe–Ito palette (LAV violet and SAT slate to keep them apart
+  from DAV and ÖAV), chosen to stay distinguishable with
   colour-vision deficiencies; fonts are Times New Roman where installed, else Liberation Serif.
 - **Protected areas (heritage map).** Nine outlines digitised by hand around towns, valleys and passes,
   accurate to a few km; schematic, not official boundaries, until replaced with `--parks`.

@@ -180,7 +180,8 @@ CITIES = {
 }
 
 # Entities.  kind = "club" (alpine club) or "authority" (public body).
-#   colour  : fill colour (Okabe–Ito palette, distinguishable with colour-vision deficiencies)
+#   colour  : fill colour (mostly Okabe–Ito; LAV violet and SAT slate so that neighbours and
+#             similar hues (LAV/DAV, SAT/ÖAV) stay apart)
 #   ink     : darker shade for text and lines
 #   hq      : head-office city (key in CITIES)
 #   box     : where the logo badge sits on Figure 1: "above" = directly on top of the city marker,
@@ -189,7 +190,7 @@ CITIES = {
 #   reach   : for entities with a head office outside the study area, dotted arrows from
 #             that city to their territories inside it: (lon, lat, curvature)
 ENTITIES = {
-    "LAV":  dict(kind="club", label="LAV", name="Liechtensteiner Alpenverein", colour="#56B4E9", ink="#1F78B4",
+    "LAV":  dict(kind="club", label="LAV", name="Liechtensteiner Alpenverein", colour="#8E5BB5", ink="#6A3D9A",
                  hq="Schaan", box=(8.95, 47.60), targets=[("LI", 9.56, 47.12)]),
     "SAC":  dict(kind="club", label="SAC", name="Schweizer Alpen-Club", colour="#D55E00", ink="#B34E00",
                  hq="Bern", box="above", targets=[("GR", 9.80, 46.58)],
@@ -206,8 +207,8 @@ ENTITIES = {
                  hq="Bolzano", box=(12.02, 46.98), targets=[("BZ", 11.25, 46.86)]),
     "APS":  dict(kind="authority", label="APS", name="Provincia autonoma di Bolzano", colour="#CC79A7",
                  ink="#A8507F", hq="Bolzano", box=(12.02, 46.42), targets=[("BZ", 11.05, 46.58)]),
-    "SAT":  dict(kind="club", label="SAT", name="Società degli Alpinisti Tridentini", colour="#F0E442",
-                 ink="#8F8100", hq="Trento", box=(11.92, 45.78), targets=[("TN", 11.00, 46.34)]),
+    "SAT":  dict(kind="club", label="SAT", name="Società degli Alpinisti Tridentini", colour="#64707D",
+                 ink="#4B5560", hq="Trento", box=(11.92, 45.78), targets=[("TN", 11.00, 46.34)]),
 }
 
 # Logo file per entity (logos/<name>.png); SAC and APS use their emblem only
