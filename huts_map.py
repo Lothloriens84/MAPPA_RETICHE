@@ -48,7 +48,7 @@ TABLE_TERRITORIES = ["LI", "VBG", "TIR", "GR", "SO", "BS", "BZ", "TN"]
 
 SOURCE = ("Huts: author's database of association huts (November 2026); filled markers = position from the database, "
           "hollow = estimated position, to verify.\n"
-          "Study area and section limits: SOIUSA (Marazzi 2005), approximate. Base map: Natural Earth 1:10m Cultural "
+          "Study area and section limits: SOIUSA (Marazzi 2005), polygons by M. Accorsi / ARPA Piemonte. Base map: Natural Earth 1:10m Cultural "
           "and Physical Vectors (public domain). Projection: ETRS89-LAEA Europe (EPSG:3035). Map: author's elaboration.")
 
 
@@ -85,7 +85,8 @@ def main():
 
     fig = plt.figure(figsize=(11.5, 13.2), facecolor=C["paper"])
     ax = fig.add_axes([0.025, 0.325, 0.95, 0.665])
-    rm.draw_base(ax, args.ne_dir, FRAME, territory_labels=True, section_labels="full",
+    soiusa = rm.load_soiusa()
+    rm.draw_base(ax, args.ne_dir, FRAME, territory_labels=True, section_labels="full", soiusa_groups=soiusa,
                  country_labels=COUNTRY_LABELS, li_label=LI_LABEL)
 
     # territory polygons for the count table
@@ -99,7 +100,7 @@ def main():
             pr = f["properties"]
             if (lvl == "admin0" and pr["ADMIN"] == name) or (lvl == "admin1" and pr["admin"] == ctry and pr["name"] == name):
                 geoms[key] = rm.geom_to_path(f["geometry"])
-    study_path = rm.ring_path([rm.STUDY_AREA])
+    study_paths = rm.study_area_paths(soiusa)
 
     # position duplicates (same hut under two entities) side by side
     seen = {}
@@ -121,7 +122,7 @@ def main():
                     mew=1.6 if est else 0.7, zorder=10 + (0 if est else 1))
             terr = next((t for t, p in geoms.items() if p.contains_point((x0, y0))), "other")
             counts[(terr, h["entity"])] = counts.get((terr, h["entity"]), 0) + 1
-            inside[h["entity"]] = inside.get(h["entity"], 0) + int(study_path.contains_point((x0, y0)))
+            inside[h["entity"]] = inside.get(h["entity"], 0) + int(any(p.contains_point((x0, y0)) for p in study_paths))
 
     rm.draw_scale_north(ax, FRAME, km=25)
     rm.draw_locator(fig, ax, args.ne_dir, FRAME, width=0.17)

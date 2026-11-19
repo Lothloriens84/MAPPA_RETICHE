@@ -279,7 +279,7 @@ REGION_OUTLINE = ("Italy", "Lombardia")   # dissolved provinces -> thin region b
 
 LOGO_MAX_W, LOGO_MAX_H = 58, 30   # logo inside each badge, in points
 SOURCE = ("Study area: SOIUSA Western (II/A-15), Eastern (II/A-16) and Southern (II/C-28) Rhaetian Alps (Marazzi 2005); "
-          "outline and section limits approximate.\n"
+          "outline and section limits from the SOIUSA polygons digitised by M. Accorsi, published by ARPA Piemonte.\n"
           "Base map: Natural Earth 1:10m Cultural and Physical Vectors (public domain). Projection: ETRS89-LAEA Europe (EPSG:3035). "
           "Map: author's elaboration.")
 LOGO_CREDIT = " Logos © the respective organisations, reproduced for identification only."
@@ -460,6 +460,45 @@ def load(path):
         return json.load(f)["features"]
 
 
+SOIUSA_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "soiusa_retiche.geojson")
+
+
+def load_soiusa(path=SOIUSA_FILE):
+    """SOIUSA group polygons of the Rhaetian Alps (M. Accorsi / ARPA Piemonte), or None if not downloaded."""
+    if not path or not os.path.exists(path):
+        return None
+    return load(path)
+
+
+def soiusa_rings(groups):
+    return [r for f in groups for poly in rings_of(f["geometry"]) for r in poly[:1]]
+
+
+def soiusa_section_limits(groups):
+    """Edges shared by groups of two different SOIUSA sections (the limits between sections)."""
+    owner = {}
+    for f in groups:
+        sec = f["properties"]["CODICE"].strip().split(".")[0]
+        for poly in rings_of(f["geometry"]):
+            for ring in poly:
+                for a, b in zip(ring[:-1], ring[1:]):
+                    k = tuple(sorted([(round(a[0], 5), round(a[1], 5)), (round(b[0], 5), round(b[1], 5))]))
+                    owner.setdefault(k, set()).add(sec)
+    verts, codes = [], []
+    for (a, b), secs in owner.items():
+        if len(secs) > 1:
+            verts += [proj(*a), proj(*b)]
+            codes += [Path.MOVETO, Path.LINETO]
+    return Path(verts, codes)
+
+
+def study_area_paths(groups=None):
+    """Paths to test 'inside the study area': SOIUSA groups if available, else the hand-traced outline."""
+    if groups:
+        return [geom_to_path(f["geometry"]) for f in groups]
+    return [ring_path([STUDY_AREA])]
+
+
 def set_fonts():
     plt.rcParams["font.family"] = "serif"
     plt.rcParams["font.serif"] = FONTS
@@ -471,7 +510,8 @@ def set_fonts():
 # ════════════════════════════════════════════════════════════════════════════
 
 def draw_base(ax, ne_dir, frame, territory_labels=True, section_labels="code", veil=VEIL,
-              country_labels=None, li_label=None, relief=True, study_polys=None, section_lines=True):
+              country_labels=None, li_label=None, relief=True, study_polys=None, section_lines=True,
+              soiusa_groups=None):
     """Territories, borders, lakes, study area, section limits, veil and labels.
     frame = (lon0, lon1, lat0, lat1). Returns the study-area patch."""
     set_view(*frame)
@@ -488,6 +528,8 @@ def draw_base(ax, ne_dir, frame, territory_labels=True, section_labels="code", v
         s.set_edgecolor(C["border_country"]); s.set_linewidth(0.8)
 
     # study area: hand-traced outline, or the outer boundary of given polygons (e.g. SOIUSA groups)
+    if soiusa_groups and not study_polys:
+        study_polys = soiusa_rings(soiusa_groups)
     if study_polys:
         study = PathPatch(dissolved_edges([{"type": "Polygon", "coordinates": [r]} for r in study_polys]),
                           fc="none", ec=C["study"], lw=1.8, zorder=5.2)
@@ -599,7 +641,10 @@ def draw_base(ax, ne_dir, frame, territory_labels=True, section_labels="code", v
                         path_effects=[pe.withStroke(linewidth=2.2, foreground="white")])
 
     # SOIUSA section limits and labels
-    for pts in (SECTION_LINES if section_lines else []):
+    if section_lines and soiusa_groups:
+        ax.add_patch(PathPatch(soiusa_section_limits(soiusa_groups), fc="none", ec=C["section"], lw=0.9,
+                               ls=(0, (6, 2, 1.2, 2)), zorder=4.9))
+    for pts in (SECTION_LINES if section_lines and not soiusa_groups else []):
         ax.add_patch(PathPatch(line_path(pts), fc="none", ec=C["section"], lw=0.9,
                                ls=(0, (6, 2, 1.2, 2)), zorder=4.9))
     if section_labels:
@@ -762,7 +807,8 @@ def main():
     fig = plt.figure(figsize=(16.54, 11.69), facecolor=C["paper"])          # A3 landscape (foldout)
     ax = fig.add_axes([0.012, 0.085, 0.775, 0.905])
     ax.set_anchor("W")
-    draw_base(ax, args.ne_dir, frame, section_labels="full", relief=False,
+    soiusa = load_soiusa()
+    draw_base(ax, args.ne_dir, frame, section_labels="full", relief=False, soiusa_groups=soiusa,
               country_labels=F1_COUNTRY_LABELS, li_label=F1_LI_LABEL)
     for txt, lon, lat in F1_REGION_LABELS:
         ax.text(*proj(lon, lat), txt, ha="center", va="center", size=9, color=C["muted"],

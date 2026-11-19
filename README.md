@@ -87,12 +87,14 @@ Use `--logos other/folder` to point elsewhere, or `--logos none` for a version w
 
 ## Method notes
 
-- **Study area.** The outline is digitised manually as about 65 points along the limits of the
-  SOIUSA sections (Marazzi 2005), placed at towns, passes and river confluences. It is
-  approximate (a few km) and not an official SOIUSA boundary dataset.
-- **SOIUSA section limits.** Western | Eastern: Inn (Landeck – Pfunds) – Reschen Pass – upper Val Venosta;
-  Western | Southern: Aprica – Tirano – Valtellina – Bormio – Stelvio Pass – Trafoi; Eastern | Southern:
-  Val Venosta – Merano – Bolzano. Approximate, like the outline.
+- **Study area.** Figure 1, the hut map and the SOIUSA map take the study-area outline and the limits between
+  the three sections from the SOIUSA polygons of the Rhaetian Alps (71 mountain groups, digitised by Massimo Accorsi,
+  published by ARPA Piemonte; download command under *Running it*). Without that file the scripts fall back to a
+  hand-traced outline (`STUDY_AREA`, about 65 points along the section limits, accurate to a few km), which the
+  heritage map still uses.
+- **SOIUSA section limits.** From the SOIUSA polygons (edges shared by groups of two different sections); the
+  hand-traced fallback (`SECTION_LINES`) follows Inn – Reschen – Val Venosta, Aprica – Valtellina – Stelvio, and
+  Val Venosta – Merano – Bolzano.
 - **Projection.** Figure 1 and the hut map: ETRS89-LAEA Europe (EPSG:3035), computed in the script with
   the ellipsoidal formulas (Snyder 1987), so the scale bar is exact. The heritage map still uses the earlier
   equirectangular base (longitude scaled by the cosine of ≈46.6°N); its scale bar is approximate.
