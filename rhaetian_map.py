@@ -152,6 +152,18 @@ SECTIONS = [   # code, name, label lon/lat (Figure 1 shows the code; the hut map
     ("II/C-28", "Southern Rhaetian Alps", 10.62, 46.27),
 ]
 
+# Rivers (Natural Earth 1:10m rivers + Europe supplement, trimmed: ne_data/ne_10m_rivers_alps.geojson)
+RIVER_COLOUR = "#6FA3BE"
+RIVER_LABELS = [   # (names in the data, label, lon, lat): label sits on the nearest river vertex, along the river
+    (("Rhein", "Rhine", "Rhin"), "Rhine", 9.62, 47.38),
+    (("Inn",), "Inn", 10.98, 47.29),
+    (("Adige",), "Adige", 11.17, 46.24),
+    (("Adda",), "Adda", 9.72, 46.15),
+    (("Oglio",), "Oglio", 10.33, 46.02),
+    (("Ill",), "Ill", 9.74, 47.18),
+    (("Ticino",), "Ticino", 8.80, 45.85),
+]
+
 # Operating territories: key -> (admin level, country, Natural Earth name, English label, label lon, lat)
 TERRITORIES = {
     "GR":  ("admin1", "Switzerland",   "Graubünden",    "Graubünden",   9.95, 46.72),
@@ -241,7 +253,7 @@ REGION_OUTLINE = ("Italy", "Lombardia")   # dissolved provinces -> thin region b
 LOGO_MAX_W, LOGO_MAX_H = 58, 30   # logo inside each badge, in points
 SOURCE = ("Study area: SOIUSA Western (II/A-15), Eastern (II/A-16) and Southern (II/C-28) Rhaetian Alps (Marazzi 2005); "
           "outline and section limits approximate.\n"
-          "Base map: Natural Earth 1:10m Cultural Vectors (public domain). Projection: ETRS89-LAEA Europe (EPSG:3035). "
+          "Base map: Natural Earth 1:10m Cultural and Physical Vectors (public domain). Projection: ETRS89-LAEA Europe (EPSG:3035). "
           "Map: author's elaboration.")
 LOGO_CREDIT = " Logos © the respective organisations, reproduced for identification only."
 
@@ -498,6 +510,39 @@ def draw_base(ax, ne_dir, frame, territory_labels=True, section_labels="code", v
             p = geom_to_path(f["geometry"])
             if p:
                 ax.add_patch(PathPatch(p, fc=C["lake"], ec="none", zorder=3.5))
+
+    # rivers
+    fn = os.path.join(ne_dir, "ne_10m_rivers_alps.geojson")
+    if os.path.exists(fn):
+        rivers = load(fn)
+        for f in rivers:
+            r = f["properties"].get("scalerank") or 10
+            lw = 1.4 if r <= 6 else 1.1 if r <= 8 else 0.85
+            for line in f["geometry"]["coordinates"]:
+                ax.add_patch(PathPatch(line_path(line), fc="none", ec=RIVER_COLOUR, lw=lw,
+                                       capstyle="round", joinstyle="round", zorder=3.45))
+        (vx0, vx1), (vy0, vy1) = ax.get_xlim(), ax.get_ylim()
+        for names, label, lon, lat in RIVER_LABELS:
+            tx, ty = proj(lon, lat)
+            if not (vx0 < tx < vx1 and vy0 < ty < vy1):
+                continue
+            best = None
+            for f in rivers:
+                if f["properties"].get("name") not in names:
+                    continue
+                for line in f["geometry"]["coordinates"]:
+                    pts = [proj(x, y) for x, y in line]
+                    for i in range(len(pts) - 1):
+                        d = (pts[i][0] - tx) ** 2 + (pts[i][1] - ty) ** 2
+                        if best is None or d < best[0]:
+                            best = (d, pts[i], pts[i + 1])
+            if best:
+                (_, (x0_, y0_), (x1_, y1_)) = best
+                ang = math.degrees(math.atan2(y1_ - y0_, x1_ - x0_))
+                ang = ang - 180 if ang > 90 else ang + 180 if ang < -90 else ang
+                ax.text((x0_ + x1_) / 2, (y0_ + y1_) / 2, label, rotation=ang, rotation_mode="anchor",
+                        ha="center", va="bottom", size=8.2, style="italic", color="#3E7896", zorder=6.2,
+                        path_effects=[pe.withStroke(linewidth=2.2, foreground="white")])
 
     # SOIUSA section limits and labels
     for pts in SECTION_LINES:

@@ -49,7 +49,7 @@ TABLE_TERRITORIES = ["LI", "VBG", "TIR", "GR", "SO", "BS", "BZ", "TN"]
 SOURCE = ("Huts: author's database of association huts (November 2026); filled markers = position from the database, "
           "hollow = estimated position, to verify.\n"
           "Study area and section limits: SOIUSA (Marazzi 2005), approximate. Base map: Natural Earth 1:10m Cultural "
-          "Vectors (public domain). Projection: ETRS89-LAEA Europe (EPSG:3035). Map: author's elaboration.")
+          "and Physical Vectors (public domain). Projection: ETRS89-LAEA Europe (EPSG:3035). Map: author's elaboration.")
 
 
 def read_huts(path):
