@@ -152,7 +152,7 @@ SECTION_LINES = [
 SECTIONS = [   # code, name, label lon/lat (Figure 1 shows the code; the hut map shows both)
     ("II/A-15", "Western Rhaetian Alps", 9.78, 46.47),
     ("II/A-16", "Eastern Rhaetian Alps", 10.95, 46.86),
-    ("II/C-28", "Southern Rhaetian Alps", 10.62, 46.27),
+    ("II/C-28", "Southern Rhaetian Alps", 10.47, 46.30),
 ]
 
 # Relief: hillshade from Copernicus DEM GLO-90 (tools/dem_hillshade.py -> ne_data/hillshade_laea.png)
@@ -746,7 +746,7 @@ def main():
     fig = plt.figure(figsize=(16.54, 11.69), facecolor=C["paper"])          # A3 landscape (foldout)
     ax = fig.add_axes([0.012, 0.085, 0.775, 0.905])
     ax.set_anchor("W")
-    draw_base(ax, args.ne_dir, frame, section_labels="code", relief=False,
+    draw_base(ax, args.ne_dir, frame, section_labels="full", relief=False,
               country_labels=F1_COUNTRY_LABELS, li_label=F1_LI_LABEL)
     for txt, lon, lat in F1_REGION_LABELS:
         ax.text(*proj(lon, lat), txt, ha="center", va="center", size=9, color=C["muted"],
@@ -849,7 +849,7 @@ def main():
     ]
     labels = [
         "Rhaetian Alps (study area)",
-        "Limit between SOIUSA sections\n(II/A-15 Western, II/A-16 Eastern,\nII/C-28 Southern Rhaetian Alps)",
+        "Limit between SOIUSA sections",
         *[("Vorarlberg and Tyrol" if name == "Tyrol" else name) + ": shared by\n" +
           " + ".join(ENTITIES[e]["label"] for e in ents) for name, ents in shared],
         "Outside the study area (paler)",
