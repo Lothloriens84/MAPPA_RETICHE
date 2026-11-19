@@ -7,3 +7,7 @@ parks*.geojson
 wdpa/
 WDPA*/
 *.xlsx
+
+# Copernicus DEM tiles: keep local (derived hillshade is in ne_data/)
+copernicus_dem*/
+*_DEM.tif

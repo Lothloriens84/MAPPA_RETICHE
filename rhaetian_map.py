@@ -152,6 +152,11 @@ SECTIONS = [   # code, name, label lon/lat (Figure 1 shows the code; the hut map
     ("II/C-28", "Southern Rhaetian Alps", 10.62, 46.27),
 ]
 
+# Relief: hillshade from Copernicus DEM GLO-90 (tools/dem_hillshade.py -> ne_data/hillshade_laea.png)
+RELIEF_DARK, RELIEF_LIGHT = 0.50, 0.30      # strength of shadows / highlights
+DEM_CREDIT = (" Relief: Copernicus DEM GLO-90 (© DLR e.V. 2010–2014 and © Airbus Defence and Space GmbH 2014–2018, "
+              "provided under COPERNICUS by the European Union and ESA).")
+
 # Rivers (Natural Earth 1:10m rivers + Europe supplement, trimmed: ne_data/ne_10m_rivers_alps.geojson)
 RIVER_COLOUR = "#6FA3BE"
 RIVER_LABELS = [   # (names in the data, label, lon, lat): label sits on the nearest river vertex, along the river
@@ -290,6 +295,7 @@ def laea(lon, lat):
     return x / 1000.0, y / 1000.0
 
 
+RELIEF_USED = False
 _PROJ = "eqc"                 # heritage_map.py keeps this; Figure 1 and the hut map call use_laea()
 KM = 1 / 111.32               # map units per kilometre
 _VIEW = (LON_MIN, LON_MAX, LAT_MIN, LAT_MAX)
@@ -482,6 +488,24 @@ def draw_base(ax, ne_dir, frame, territory_labels=True, section_labels="code", v
         if len(cols) > 1:
             draw_stripes(ax, path, cols, shape).set_zorder(z + 0.005)
         ax.add_patch(PathPatch(path, fc="none", ec="white", lw=1.0, zorder=2.3))
+
+    # relief (only in the LAEA maps; the hillshade grid is in EPSG:3035)
+    hs_png = os.path.join(ne_dir, "hillshade_laea.png")
+    if _PROJ == "laea" and os.path.exists(hs_png):
+        meta = json.load(open(os.path.splitext(hs_png)[0] + ".json"))
+        shade = plt.imread(hs_png).astype(float)
+        if shade.max() > 1:
+            shade = shade / 255.0
+        flat = math.sin(math.radians(45))
+        dark = np.clip((flat - shade) / flat, 0, 1) * RELIEF_DARK
+        light = np.clip((shade - flat) / (1 - flat), 0, 1) * RELIEF_LIGHT
+        rgba = np.zeros(shade.shape + (4,))
+        rgba[..., :3] = (light / np.maximum(light + dark, 1e-6))[..., None]   # white where lit, black in shadow
+        rgba[..., 3] = np.maximum(dark, light)
+        ax.imshow(rgba, extent=meta["extent_km"], origin="upper", interpolation="bilinear", zorder=2.35)
+        ax.set_xlim(x0, x1); ax.set_ylim(y0, y1)
+        global RELIEF_USED
+        RELIEF_USED = True
 
     # internal borders (provinces, states, cantons) on top of the fills
     for f in adm1:
@@ -774,7 +798,7 @@ def main():
                frameon=False, fontsize=9, handlelength=1.4, columnspacing=1.5, labelcolor=C["text"],
                title="Territory colour = entity operating huts there", title_fontsize=9)
 
-    fig.text(0.5, 0.008, SOURCE + (LOGO_CREDIT if any_logo else ""), ha="center", va="bottom",
+    fig.text(0.5, 0.008, SOURCE + (LOGO_CREDIT if any_logo else "") + (("\n" + DEM_CREDIT.strip()) if RELIEF_USED else ""), ha="center", va="bottom",
              size=8, color=C["muted"], linespacing=1.4)
 
     for ext in ("png", "pdf", "svg"):

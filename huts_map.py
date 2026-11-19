@@ -181,7 +181,7 @@ def main():
     note = ""
     if missing:
         note = (f"Not shown (no position yet): " + ", ".join(f"{m['hut_id']} {m['name']}" for m in missing) + ".\n")
-    fig.text(0.5, 0.004, note + SOURCE, ha="center", va="bottom", size=7.6, color=C["muted"], linespacing=1.35)
+    fig.text(0.5, 0.004, note + SOURCE + (("\n" + rm.DEM_CREDIT.strip()) if rm.RELIEF_USED else ""), ha="center", va="bottom", size=7.6, color=C["muted"], linespacing=1.35)
 
     for ext in ("png", "pdf", "svg"):
         fig.savefig(f"{args.out}.{ext}", dpi=300, facecolor=fig.get_facecolor())

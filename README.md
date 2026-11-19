@@ -95,6 +95,11 @@ Use `--logos other/folder` to point elsewhere, or `--logos none` for a version w
   AVS: Bolzano; Autonomous Province: Bolzano; SAT: Trento (from each entity's own website or statute,
   November 2026). Figure 1 uses a wider frame than the heritage map so that all of them are on the map.
 - **Locator.** Europe from Natural Earth 1:10m countries, simplified (Douglas–Peucker, 0.04°).
+- **Relief.** Hillshade (sun from the north-west, 45°) computed from Copernicus DEM GLO-90 tiles (N45–N48,
+  E007–E012) and resampled to the ETRS89-LAEA grid at 250 m by `tools/dem_hillshade.py`
+  (`ne_data/hillshade_laea.png`). The raw DEM tiles are not included; download them from the public
+  `copernicus-dem-90m` bucket and rerun the tool. Copernicus DEM © DLR e.V. 2010–2014 and © Airbus Defence and
+  Space GmbH 2014–2018, provided under COPERNICUS by the European Union and ESA.
 - **Rivers.** Natural Earth 1:10m rivers and lake centerlines plus the Europe supplement, trimmed to the
   Alpine area (`ne_data/ne_10m_rivers_alps.geojson`). Smaller rivers such as the Isarco and the Sarca are not
   in the dataset at this scale.
