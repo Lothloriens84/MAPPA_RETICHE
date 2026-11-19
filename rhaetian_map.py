@@ -49,9 +49,12 @@ import matplotlib.patheffects as pe
 LON_MIN, LON_MAX = 8.75, 12.95      # base extent (also used by heritage_map.py)
 LAT_MIN, LAT_MAX = 45.55, 47.62
 
-# Figure 1 frame: wider than the base extent so that every head office is on the map
-F1_LON_MIN, F1_LON_MAX = 7.10, 12.35
-F1_LAT_MIN, F1_LAT_MAX = 45.28, 48.32
+# Figure 1 frame: around the study area; head offices outside it (Bern, Milan, Munich)
+# are shown by an arrow at the map edge pointing towards the city
+F1_LON_MIN, F1_LON_MAX = 8.55, 12.75
+F1_LAT_MIN, F1_LAT_MAX = 45.55, 47.85
+EDGE_CENTRE = (10.40, 46.62)     # edge arrows point along the line from here to the city
+EDGE_BADGE_KM = 40               # badge sits this far inside the map edge
 
 # Fonts: Times New Roman if installed, else a metric-compatible serif
 FONTS = ["Times New Roman", "Liberation Serif", "TeX Gyre Termes", "DejaVu Serif"]
@@ -208,15 +211,15 @@ CITIES = {
 #             that city to their territories inside it: (lon, lat, curvature)
 ENTITIES = {
     "LAV":  dict(kind="club", label="LAV", name="Liechtensteiner Alpenverein", colour="#8E5BB5", ink="#6A3D9A",
-                 hq="Schaan", box=(8.95, 47.60), targets=[("LI", 9.56, 47.12)]),
+                 hq="Schaan", box=(8.98, 47.12), targets=[("LI", 9.56, 47.12)]),
     "SAC":  dict(kind="club", label="SAC", name="Schweizer Alpen-Club", colour="#D55E00", ink="#B34E00",
-                 hq="Bern", box="above", targets=[("GR", 9.80, 46.58)],
+                 hq="Bern", box="edge", targets=[("GR", 9.80, 46.58)],
                  reach=[(9.72, 46.66, -0.2)]),
     "CAI":  dict(kind="club", label="CAI", name="Club Alpino Italiano", colour="#009E73", ink="#007A59",
-                 hq="Milan", box="above", targets=[("SO", 10.02, 46.36), ("BS", 10.45, 46.08)],
+                 hq="Milan", box="edge", targets=[("SO", 10.02, 46.36), ("BS", 10.45, 46.08)],
                  reach=[(10.02, 46.30, 0.15), (10.42, 46.06, 0.15), (11.02, 46.62, 0.22)]),
     "DAV":  dict(kind="club", label="DAV", name="Deutscher Alpenverein", colour="#0072B2", ink="#0072B2",
-                 hq="Munich", box="right", targets=[("VBG", 9.90, 47.06), ("TIR", 10.82, 47.10)],
+                 hq="Munich", box="edge", targets=[("VBG", 9.90, 47.06), ("TIR", 10.82, 47.10)],
                  reach=[(9.92, 47.05, 0.18), (10.85, 47.08, 0.15)]),
     "OEAV": dict(kind="club", label="ÖAV", name="Österreichischer Alpenverein", colour="#E69F00", ink="#B07800",
                  hq="Innsbruck", box=(11.95, 47.72), targets=[("VBG", 10.12, 47.02), ("TIR", 11.25, 47.12)]),
@@ -242,16 +245,19 @@ LI_LABEL = ("LIECHTENSTEIN", 9.10, 47.41, 9.51, 47.19)   # text lon/lat, leader-
 
 # Figure 1 positions for the same labels in its wider frame
 F1_COUNTRY_LABELS = [
-    ("SWITZERLAND", 8.20, 46.75),
-    ("AUSTRIA", 12.05, 47.42),
-    ("GERMANY", 9.95, 47.95),
-    ("ITALY", 10.40, 45.45),
+    ("SWITZERLAND", 8.95, 46.30),
+    ("AUSTRIA", 12.45, 47.40),
+    ("GERMANY", 9.95, 47.78),
+    ("ITALY", 12.30, 45.68),
 ]
-F1_LI_LABEL = ("LIECHTENSTEIN", 8.80, 47.30, 9.53, 47.14)
+F1_LI_LABEL = ("LIECHTENSTEIN", 9.05, 47.35, 9.53, 47.14)
 
 # Region-tier labels (units the text refers to that are not operating territories)
 REGION_LABELS = [
     ("LOMBARDY", 9.80, 45.82),
+]
+F1_REGION_LABELS = [
+    ("LOMBARDY", 10.40, 45.66),
 ]
 REGION_OUTLINE = ("Italy", "Lombardia")   # dissolved provinces -> thin region boundary
 
@@ -711,14 +717,17 @@ def main():
     ax = fig.add_axes([0.025, 0.175, 0.95, 0.815])
     draw_base(ax, args.ne_dir, frame, section_labels="code",
               country_labels=F1_COUNTRY_LABELS, li_label=F1_LI_LABEL)
-    for txt, lon, lat in REGION_LABELS:
+    for txt, lon, lat in F1_REGION_LABELS:
         ax.text(*proj(lon, lat), txt, ha="center", va="center", size=9, color=C["muted"],
                 style="italic", weight="bold", zorder=4,
                 path_effects=[pe.withStroke(linewidth=2.2, foreground="white")])
 
-    # head-office cities
+    # head-office cities inside the frame
+    (fx0, fx1), (fy0, fy1) = ax.get_xlim(), ax.get_ylim()
     for city, (lon, lat, off, ha) in CITIES.items():
         x, y = proj(lon, lat)
+        if not (fx0 < x < fx1 and fy0 < y < fy1):
+            continue
         ax.plot(x, y, "o", ms=7, mfc="white", mec=C["text"], mew=1.7, zorder=8.5)
         ax.plot(x, y, "o", ms=2.4, mfc=C["text"], mec="none", zorder=8.6)
         ax.annotate(city, (x, y), xytext=off, textcoords="offset points", ha=ha, va="center",
@@ -731,7 +740,31 @@ def main():
         clon, clat = CITIES[a["hq"]][:2]
         cx, cy = proj(clon, clat)
         on_city = a["box"] in ("above", "right")
-        if not on_city:
+        if a["box"] == "edge":
+            # point where the line from EDGE_CENTRE to the city leaves the map
+            ox, oy = proj(*EDGE_CENTRE)
+            dx, dy = cx - ox, cy - oy
+            n = math.hypot(dx, dy); ux, uy = dx / n, dy / n
+            ts = [t for t in ((fx0 - ox) / dx if dx else None, (fx1 - ox) / dx if dx else None,
+                              (fy0 - oy) / dy if dy else None, (fy1 - oy) / dy if dy else None) if t and t > 0]
+            t = min(ts)
+            ex, ey = ox + dx * t, oy + dy * t
+            ex, ey = ex - ux * 2 * KM, ey - uy * 2 * KM          # just inside the frame line
+            bx, by = ex - ux * EDGE_BADGE_KM * KM, ey - uy * EDGE_BADGE_KM * KM
+            ax.annotate("", xy=(ex, ey), xytext=(bx, by),
+                        arrowprops=dict(arrowstyle="-|>,head_length=0.9,head_width=0.45", color=a["ink"],
+                                        lw=2.2, shrinkA=26, shrinkB=0), zorder=8.8)
+            dist = round(math.hypot(cx - ex, cy - ey) / KM / 5) * 5
+            ang = math.degrees(math.atan2(uy, ux))
+            txt_ang = ang - 180 if ang > 90 else ang + 180 if ang < -90 else ang
+            px_, py_ = -uy, ux                                        # perpendicular, for the label offset
+            mx, my = (ex + bx) / 2 + px_ * 0 , (ey + by) / 2
+            ax.annotate(f"{a['hq']} {dist} km", (ex - ux * 12 * KM, ey - uy * 12 * KM), xytext=(px_ * 11, py_ * 11),
+                        textcoords="offset points", rotation=txt_ang, rotation_mode="anchor",
+                        ha="center", va="center", size=9.5, weight="bold", color=a["ink"], zorder=8.9,
+                        path_effects=[pe.withStroke(linewidth=2.8, foreground="white")])
+            cx, cy = bx, by                                           # reach arrows start from the badge
+        elif not on_city:
             bx, by = proj(*a["box"])
             ls = (0, (4, 2)) if a["kind"] == "authority" else "-"
             ax.annotate("", xy=(cx, cy), xytext=(bx, by),
@@ -746,7 +779,10 @@ def main():
             ax.plot(*proj(rlon, rlat), "o", ms=3.6, mfc="white", mec=a["ink"], mew=1.3, zorder=8)
         logo = find_logo(key, args.logos)
         any_logo |= bool(logo)
-        if on_city:      # badge sits just above / right of the city marker
+        if a["box"] == "edge":
+            ax.add_artist(AnnotationBbox(make_badge(a, logo), (bx, by), xycoords="data", frameon=True,
+                                         zorder=9, pad=0.3, bboxprops=badge_box(a)))
+        elif on_city:    # badge sits just above / right of the city marker
             off, align = ((0, 9), (0.5, 0)) if a["box"] == "above" else ((9, 0), (0, 0.5))
             ax.add_artist(AnnotationBbox(make_badge(a, logo), (cx, cy), xycoords="data", frameon=True,
                                          xybox=off, boxcoords="offset points", box_alignment=align,
@@ -756,7 +792,7 @@ def main():
                                          zorder=9, pad=0.3, bboxprops=badge_box(a)))
 
     draw_scale_north(ax, frame)
-    draw_locator(fig, ax, args.ne_dir, frame)
+    draw_locator(fig, ax, args.ne_dir, frame, width=0.17)
 
     # legend (map symbols) and key (entities)
     n_club = sum(a["kind"] == "club" for a in ENTITIES.values())
@@ -771,6 +807,7 @@ def main():
         Line2D([], [], color=C["border_country"], lw=1.1, ls=(0, (5, 1.6))),
         Line2D([], [], color=C["border_region"], lw=0.9),
         Line2D([], [], ls="none", marker="o", ms=7, mfc="white", mec=C["text"], mew=1.7),
+        Line2D([], [], ls="none", marker=r"$\rightarrow$", ms=14, color=C["text"]),
         Line2D([], [], color=C["text"], lw=1.2, ls=(0, (1.5, 1.5)), marker="o", ms=3.6,
                mfc="white", mec=C["text"], markevery=[1]),
         club_h, auth_h,
@@ -783,7 +820,8 @@ def main():
         "National border",
         "Regional border (Lombardy)",
         "Head office",
-        "From a head office outside the study area to its territories",
+        "Direction and distance of a head office beyond the map",
+        "From an entity based outside the map to its territories",
         f"Alpine club ({n_club})",
         f"Public authority ({n_auth})",
     ]

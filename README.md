@@ -14,7 +14,7 @@ hut-governing entities (seven alpine clubs and one public authority) own or oper
 Each club's territory is its whole country (CAI: Italy; DAV: Germany; SAC: Switzerland; ÖAV:
 Austria; LAV: Liechtenstein), with the units that have their own arrangement drawn on top and
 striped where entities share them (Vorarlberg and Tyrol: DAV and ÖAV; South Tyrol: CAI, AVS and
-the Province; Trentino: SAT). Each entity's logo and acronym sit on its head office (CAI and SAC directly on top of Milan and Bern, DAV right of Munich; the others beside their city, with a short leader); for the
+the Province; Trentino: SAT). Each entity's logo and acronym sit beside its head office; for CAI, SAC and DAV, whose head offices (Milan, Bern, Munich) lie beyond the map, an arrow at the map edge points towards the city, with its name and distance; for the
 three with head offices outside the study area (CAI, SAC, DAV), dotted arrows run from that city to
 their territories inside it. Dash-dot lines mark the limits between the three SOIUSA sections, and a
 locator in the top-left corner shows where the study area lies in Europe.
@@ -93,7 +93,7 @@ Use `--logos other/folder` to point elsewhere, or `--logos none` for a version w
   area sits under a white veil, so the part of each territory inside the study area stands out.
 - **Head offices (Figure 1).** LAV: Schaan; SAC: Bern; CAI: Milan; DAV: Munich; ÖAV: Innsbruck;
   AVS: Bolzano; Autonomous Province: Bolzano; SAT: Trento (from each entity's own website or statute,
-  November 2026). Figure 1 uses a wider frame than the heritage map so that all of them are on the map.
+  November 2026). Milan, Bern and Munich lie beyond the Figure 1 frame and are shown by edge arrows with the distance from the map edge.
 - **Locator.** Europe from Natural Earth 1:10m countries, simplified (Douglas–Peucker, 0.04°).
 - **Relief.** Hillshade (sun from the north-west, 45°) computed from Copernicus DEM GLO-90 tiles (N45–N48,
   E007–E012) and resampled to the ETRS89-LAEA grid at 250 m by `tools/dem_hillshade.py`
