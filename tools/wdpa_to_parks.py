@@ -1,5 +1,7 @@
 """
 Extract the study-area parks from Protected Planet File Geodatabase downloads
+(and, for Parc Ela, Biosfera Val Müstair and Naturpark Beverin, from the FOEN/BAFU
+"Pärke von nationaler Bedeutung" geodatabase, converted from LV95 with tools/lv95.py)
 into one local GeoJSON for heritage_map.py --parks.
 
     python tools/wdpa_to_parks.py <download.gdb> [<more.gdb> ...] --out output/parks_wdpa.geojson
@@ -14,6 +16,9 @@ git-ignored and must not be committed or deposited.
 import argparse, glob, json, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import fgdb
+import lv95
+
+SWISS_KEYS = {"ELA", "BVM", "BEV"}   # taken from the FOEN parks file (not in, or not complete in, the WDPA)
 
 MATCH = [  # (key, substrings in NAME / NAME_ENG, lower case); first hit wins
     ("PNAB", ["adamello brenta", "adamello-brenta"]),
@@ -27,6 +32,7 @@ MATCH = [  # (key, substrings in NAME / NAME_ENG, lower case); first hit wins
     ("KAU",  ["kaunergrat"]),
     ("BVM",  ["biosfera val müstair", "biosfera val muestair", "biosphere val müstair", "val müstair biosfera"]),
     ("ELA",  ["ela"]),
+    ("BEV",  ["beverin"]),
 ]
 
 
@@ -68,6 +74,14 @@ def main():
             except Exception:
                 continue
             for r in rows:
+                if "ObjNummer" in r and "Kategorie" in r and "Zone" not in r:   # FOEN park perimeter (LV95)
+                    if not r.get("Shape"):
+                        continue
+                    r = {"SITE_ID": f"CH-{r['ObjNummer']}", "NAME": r.get("Name"), "DESIG_ENG": "",
+                         "GIS_AREA": (r.get("Shape_Area") or 0) / 1e6, "src": "FOEN",
+                         "SHAPE": [[lv95.lv95_to_wgs84(*p) for p in rg] for rg in r["Shape"]]}
+                    if key_for(r) not in SWISS_KEYS:
+                        continue
                 if "SITE_ID" not in r:
                     continue
                 if not r.get("SHAPE"):
@@ -91,7 +105,8 @@ def main():
                         f["geometry"]["coordinates"] += polys
                     else:
                         feats[k] = {"type": "Feature",
-                                    "properties": {"key": k, "SITE_ID": r["SITE_ID"], "NAME": r.get("NAME")},
+                                    "properties": {"key": k, "SITE_ID": r["SITE_ID"], "NAME": r.get("NAME"),
+                                                   "src": r.get("src", "WDPA")},
                                     "geometry": {"type": "MultiPolygon", "coordinates": polys}}
     json.dump({"type": "FeatureCollection", "features": list(feats.values())},
               open(a.out, "w", encoding="utf-8"))

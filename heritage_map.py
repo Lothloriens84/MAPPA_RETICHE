@@ -88,6 +88,11 @@ PARKS = {
     "ELA": dict(n=9, name="Parc Ela", kind="swiss", at=(9.71, 46.58), label=("Parc Ela", (9.71, 46.57)), outline=[
         (9.52, 46.62), (9.60, 46.68), (9.70, 46.70), (9.80, 46.67), (9.88, 46.60), (9.82, 46.53),
         (9.73, 46.46), (9.62, 46.45), (9.55, 46.52)]),
+    # Naturpark Beverin lies only partly in the study area (its eastern half: Ferrera, Avers)
+    "BEV": dict(n=10, name="Naturpark Beverin (partly)", kind="swiss", at=(9.36, 46.58),
+                label=("Naturpark Beverin\n(partly in study area)", (9.20, 46.40)), outline=[
+        (9.32, 46.81), (9.36, 46.72), (9.43, 46.67), (9.49, 46.65), (9.50, 46.58), (9.50, 46.52),
+        (9.43, 46.49), (9.39, 46.47), (9.36, 46.51), (9.28, 46.51), (9.17, 46.53), (9.29, 46.71)]),
 }
 
 # Quality labels: one per territory.  Territories absent here are drawn neutral.
@@ -181,15 +186,29 @@ def mix(hex_colour, m):
 # ════════════════════════════════════════════════════════════════════════════
 
 def load_parks(path):
-    """Exact park geometries from a GeoJSON with a 'key' property; returns {key: Path}."""
+    """Exact park geometries from a GeoJSON with 'key' and 'src' properties; returns ({key: Path}, {key: src})."""
     with open(path, encoding="utf-8") as f:
         feats = json.load(f)["features"]
-    out = {}
+    out, src = {}, {}
     for ft in feats:
         k = ft["properties"].get("key")
         if k in PARKS:
             out[k] = geom_to_path(ft["geometry"])
-    return out
+            src[k] = ft["properties"].get("src", "WDPA")
+    return out, src
+
+
+SOURCES = {
+    "WDPA": "WDPA, UNEP-WCMC & IUCN (Nov 2026), protectedplanet.net",
+    "FOEN": "FOEN/BAFU, Pärke von nationaler Bedeutung (2025), data.geo.admin.ch",
+}
+
+
+def short(name):
+    for a, b in ((" National Park", " NP"), (" Nature Park", ""), (" Regional Park", ""), (" (partly)", ""),
+                 ("Naturpark ", "")):
+        name = name.replace(a, b)
+    return name
 
 
 def main():
@@ -204,7 +223,7 @@ def main():
     adm0 = load(os.path.join(args.ne_dir, "ne_10m_admin_0_countries.geojson"))
     adm1 = load(os.path.join(args.ne_dir, "ne_10m_admin_1_states_provinces.geojson"))
     lakes = load(os.path.join(args.ne_dir, "ne_10m_lakes.geojson"))
-    exact = load_parks(args.parks) if args.parks else {}
+    exact, exact_src = load_parks(args.parks) if args.parks else ({}, {})
 
     plt.rcParams["font.family"] = "DejaVu Sans"
     plt.rcParams["hatch.linewidth"] = 0.5
@@ -385,7 +404,7 @@ def main():
                 Line2D([], [], color=ICH_COLOUR, lw=1.6, ls=(0, (3, 1.4)))]
     labels += ["Quality label", "Valley initiative",
                "Intangible cultural heritage (UNESCO)", "Transhumance route"]
-    fig.legend(handles, labels, loc="lower center", bbox_to_anchor=(0.5, 0.068), ncol=4, frameon=False,
+    fig.legend(handles, labels, loc="lower center", bbox_to_anchor=(0.5, 0.098), ncol=4, frameon=False,
                fontsize=7.4, handlelength=2.4, handleheight=1.1, columnspacing=1.5, labelcolor=C["text"],
                handler_map={lab_h: HandlerBox("label"),
                             val_h: HandlerBox("valley"), ich_h: HandlerBox("ich")})
@@ -395,14 +414,16 @@ def main():
     if not exact:
         src = SOURCE
     else:
-        names = [PARKS[k]["name"] for k in PARKS if k in exact]
-        if len(names) == len(PARKS):
-            which = args.parks_source
-        else:
-            which = (f"{', '.join(names)} from {args.parks_source}; "
-                     "others schematic (digitised by hand, accurate to a few km)")
-        src = SOURCE_EXACT.format(src=which)
-    fig.text(0.5, 0.012, src, ha="center", va="bottom", size=6.6, color=C["muted"], linespacing=1.4)
+        parts = []
+        for code, cite in SOURCES.items():
+            names = [short(PARKS[k]["name"]) for k in PARKS if exact_src.get(k) == code]
+            if names:
+                parts.append(f"{', '.join(names)} ({cite})")
+        rest = [short(PARKS[k]["name"]) for k in PARKS if k not in exact]
+        if rest:
+            parts.append(f"{', '.join(rest)} (schematic)")
+        src = SOURCE_EXACT.format(src=";\n".join(parts))
+    fig.text(0.5, 0.010, src, ha="center", va="bottom", size=6.2, color=C["muted"], linespacing=1.4)
 
     for ext in ("png", "pdf", "svg"):
         fig.savefig(f"{args.out}.{ext}", dpi=300, facecolor=fig.get_facecolor())
